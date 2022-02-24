@@ -1,0 +1,5 @@
+<h1>{{user}}</h1>
+<h3>Skuldastaða: {{debt}} kr</h3>
+{%for p in purchase%}
+<div>{{p.product}} - {{p.price}} kr - {{p.saletime}}</div>
+{% endfor %}

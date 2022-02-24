@@ -1,0 +1,17 @@
+
+{% if products %}
+    <ul>
+    {% for prod in products %}
+        <div id ="{{prod.id}}">
+            <img src="media/{{ prod.prod_img }}">
+            <h3>{{prod.price}}</h3>
+            <form method="post">
+                {% csrf_token %}
+                <button class="button is-danger" name="purchase" value={{prod.id}}>Kaupa</button>
+            </form>
+        </div>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>Búðin er tóm</p>
+{% endif %}
