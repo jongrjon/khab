@@ -26,3 +26,9 @@ class Payment(models.Model):
 	def __str__(self):
 		return "%s : %s" % (self.payer, self.amount)
 
+class Invite(models.Model):
+	invited = models.CharField(max_length=50)
+	timeout = models.DateTimeField('invite timeout')
+
+	def __str__(self):
+		return self.invited

@@ -1,17 +1,31 @@
 
+<form method="post">
+{% csrf_token %}
+{%if users%}
+    <select name="buyer">
+        {%for user in users%}
+        <option value="{{user.id}}" name="user">{{user.first_name}} {{user.last_name}}</option>
+        {%endfor%}
+    </select>
+
+{%endif%}
+{%if response%}
+    {%if response.status == "Success"%}<h2>{{response.message}}</h2>{%endif%}
+    {%if response.status == "Failed"%}<h2>Kaup tókust ekki. hafið samband við vefstjóra.</h2>{%endif%}
+{%endif%}
 {% if products %}
     <ul>
     {% for prod in products %}
         <div id ="{{prod.id}}">
             <img src="media/{{ prod.prod_img }}">
-            <h3>{{prod.price}}</h3>
-            <form method="post">
-                {% csrf_token %}
+            <h3>{{prod.price}} kr.</h3>
+            
                 <button class="button is-danger" name="purchase" value={{prod.id}}>Kaupa</button>
-            </form>
+            
         </div>
     {% endfor %}
     </ul>
 {% else %}
     <p>Búðin er tóm</p>
 {% endif %}
+</form>
