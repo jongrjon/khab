@@ -1,8 +1,12 @@
-{%if products%}
-    {%for product in products%}
-    <div>
-        <img src="media/{{ product.prod_img }}">
-        <h3>{{product.name}} - {{product.price}} <button class="button is-danger" name="change" value={{prod.id}}>Breyta</button></h3>
-    </div>
-    {%endfor%}
-{%endif%}
+{%extends "boutique/base.html"%}
+{%block content%}
+<button type="button"  class="btn btn-warning">Bæta við vöru</button>
+	{%if products%}
+    		{%for product in products%}
+    		<div>
+        		<img src="media/{{ product.prod_img }}">
+        		<h3>{{product.name}} - {{product.price}} <button class="btn btn-danger" name="change" value={{prod.id}}>Breyta</button></h3>
+    		</div>
+    		{%endfor%}
+	{%endif%}
+{%endblock%}

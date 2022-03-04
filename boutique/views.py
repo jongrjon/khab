@@ -49,7 +49,7 @@ def index(request):
         }
         return HttpResponse(template.render(context,request))
     if request.user.is_superuser:
-        return('/products')
+        return HttpResponseRedirect('/products')
     else:
         return HttpResponseRedirect('/login')
 
