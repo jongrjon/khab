@@ -1,0 +1,27 @@
+<div id="productpopup" class="modal fade" role="dialog">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-body">
+	<form id=newproduct" method="post">
+		{% csrf_token %}
+		<h3>Ný vara</h3>
+		<div class="input-group mb-3">
+  			<input type="text" id="productname" name="productname" placeholder="Nafn vöru" aria-label="Nafn vöru" class="form-control" />
+		</div>
+		<div class ="inpup-group mb-3">
+			<label for="productimage" class="form-label">Mynd af vöru</label>
+			<input type="file" id="productimage" placeholder="Mynd af vöru" aria-label="Mynd af vöru" name="productimage" class="form-control">
+		</div>
+		<div class="input-group mb-3">
+			<input type="number" placeholder="Verð" aria-label="Verð" name="productprice" class="form-control">
+			<span class="input-group-text">Kr.</span>
+		</div>
+
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-success" value="Submit">Vista</button>
+	<button type="button" class="btn btn-danger" name="dismiss" data-bs-dismiss="modal">Hætta við</button>
+	</form>
+      </div>
+    </div>
+  </div>
+</div>
