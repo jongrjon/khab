@@ -85,6 +85,12 @@ def products(request):
         context = {
         'products' :products,
         }
+        if  request.method == "POST":
+            data = request.POST
+            img = request.FILES.get("productimage")
+            pname = data.get("productname")
+            pprice = data.get("productprice")
+            Product.objects.update_or_create(name = pname, defaults ={'name' : pname,'prod_img' : img, 'price' : pprice})
         return HttpResponse(template.render(context,request))
     else:
         return HttpResponseRedirect('/')
