@@ -1,0 +1,13 @@
+.thumbnail {
+	max-width:100%;
+	max-height:100%;
+	object-fit: cover;
+}
+
+.thumbnail-container{
+	display: inline-block;
+	height: 0;
+	padding-bottom: 100%;
+	width: 100%;
+	max-height:200px;
+}

@@ -2,18 +2,18 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-body">
-	<form id=newproduct" method="post">
+	<form id=newproduct" method="post" enctype= "multipart/form-data">
 		{% csrf_token %}
 		<h3>Ný vara</h3>
 		<div class="input-group mb-3">
-  			<input type="text" id="productname" name="productname" placeholder="Nafn vöru" aria-label="Nafn vöru" class="form-control" />
+  			<input type="text" id="productname" name="productname" placeholder="Nafn vöru" aria-label="Nafn vöru" class="form-control" required>
 		</div>
 		<div class ="inpup-group mb-3">
 			<label for="productimage" class="form-label">Mynd af vöru</label>
-			<input type="file" id="productimage" placeholder="Mynd af vöru" aria-label="Mynd af vöru" name="productimage" class="form-control">
+			<input type="file" id="productimage" placeholder="Mynd af vöru" aria-label="Mynd af vöru" name="productimage" class="form-control" required >
 		</div>
 		<div class="input-group mb-3">
-			<input type="number" placeholder="Verð" aria-label="Verð" name="productprice" class="form-control">
+			<input type="number" placeholder="Verð" aria-label="Verð" name="productprice" class="form-control" required >
 			<span class="input-group-text">Kr.</span>
 		</div>
 
