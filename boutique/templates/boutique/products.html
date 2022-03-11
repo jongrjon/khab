@@ -4,14 +4,22 @@
 {%block content%}
 <button type="button"  class="btn btn-warning" onclick="newProduct(event)">Bæta við vöru</button>
 	{%if products%}
+	<div class="row row-cols-2 row-cols-md-3 row-cols-xs-2 col-lg-5  g-4">
     		{%for product in products%}
-		<div class="media">
-        		<img src = "media/{{ product.prod_img }}" class="mr-3">
-			<div class ="media-body">
-				<h3 class=mt-0">{{product.name}}</h3> <h4>{{product.price}}kr.</h4> <button class="newproduct btn btn-danger" name="change" value={{prod.id}}>Breyta</button>
-    			</div>
+		<div class ="col">
+			<div class="card">
+        			<img src = "media/{{ product.prod_img }}" class="card-img-top thumbnail">
+				<div class ="card-body">
+					<h3 class="card-title">{{product.name}}</h3> 
+					<div class="d-grid gap-2">
+						<h4>{{product.price}} kr.</h4> 
+						<button class="newproduct btn btn-danger btn-block" name="change" value={{product.id}} onclick="editProduct(event,{{product.id}})">Breyta</button>
+					</div>
+				</div>
+			</div>
 		</div>
     		{%endfor%}
+	</div>
 	{%endif%}
 {%include "boutique/newproduct.html"%}
 {%endblock%}
