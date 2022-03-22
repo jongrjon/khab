@@ -10,19 +10,35 @@
 		<link href="{% static 'css/boutique.css' %}" rel = "stylesheet">
     		<title>{%block title%}{%endblock%}</title>
   	</head>
-  	<body>
-		<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  	<body >
+		<script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha384-xBuQ/xzmlsLoJpyjoggmTEz8OWUFM0/RC5BsqQBDX2v5cMvDHcMakNTNrHIW2I5f" crossorigin="anonymous"></script>
 		<script src="{% static 'js/bootstrap.bundle.min.js'%}"></script>
     		<script src="{% static 'js/boutique.js'%}"></script>
-    		<header class="container">
-			<h1>KHA Boutique</h1>
-			<h3>{%block header%}{%endblock%}</h3>
-    		</header>
-    		<div class ="container">
+		<header>
+		<nav class="navbar navbar-expand-lg navbar-dark g-4">
+			<div class="container-fluid">
+				<a class="navbar-brand" href="/">KHA Boutique</a>
+				{%if user.is_authenticated%}
+				<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+					<span class="navbar-toggler-icon"></span>
+				</button>
+				<div class="collapse navbar-collapse" id="navbarSupportedContent">
+					<ul class="navbar-nav me-auto mb-2 mb-lg-0">
+						{%if request.user.is_superuser%}
+						<li class="nav-item"><a class="nav-link" aria-current="page" href="/users">Users</a></li>
+						{%else%}
+						<li class="nav-item"><a class="nav-link" aria-current="page" href="/users/{{request.user.id}}">{{request.user.first_name}} {{request.user.last_name}}</a></li>
+						{%endif%}	
+					</ul>
+					<button class="btn btn-outline-light my-2 my-sm-0" type="button" href="/logout">Útskrá</button> 
+				</div>
+				{%endif%}
+			</div>
+		</nav>
+		</header>
+    		<div class ="container mt-3">
 			{%block content %}
 			{%endblock%}
     		</div>
-
-    		<footer></footer>
   	</body>
 </html>

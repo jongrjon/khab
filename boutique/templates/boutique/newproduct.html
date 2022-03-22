@@ -1,27 +1,54 @@
-<div id="productpopup" class="modal fade" role="dialog">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-body">
-	<form id=newproduct" method="post" enctype= "multipart/form-data">
-		{% csrf_token %}
-		<h3>Ný vara</h3>
-		<div class="input-group mb-3">
-  			<input type="text" id="productname" name="productname" placeholder="Nafn vöru" aria-label="Nafn vöru" class="form-control" required>
-		</div>
-		<div class ="inpup-group mb-3">
-			<label for="productimage" class="form-label">Mynd af vöru</label>
-			<input type="file" id="productimage" placeholder="Mynd af vöru" aria-label="Mynd af vöru" name="productimage" class="form-control" required >
-		</div>
-		<div class="input-group mb-3">
-			<input type="number" placeholder="Verð" aria-label="Verð" name="productprice" class="form-control" required >
-			<span class="input-group-text">Kr.</span>
-		</div>
+<!doctype html>
+<html lang="en">
+        <head>
+        <!-- Required meta tags -->
+                <meta charset="utf-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1">
+                {%load static%}
+                <!-- Bootstrap CSS -->
+                <link href="{% static 'css/bootstrap.min.css' %}" rel = "stylesheet">
+                <link href="{% static 'css/boutique.css' %}" rel = "stylesheet">
+                <title>{%block title%}{%endblock%}</title>
+        </head>
+        <body>
+		
+  		<div class="modal-dialog modal-lg">
+    			<div class="modal-content">
+      				<div class="modal-body">
+					<div class="row">
+						<div class="col-6">
+							<h3>{%if product%}Breyta vöru{%else%}Ný vara{%endif%}</h3>
+					{%if product%}
+						</div>
+						<div class ="col-6"> 
+                                        		<form id="deletep" action="deleteproduct" form="deletep"  method="post">
+                                                	{%csrf_token%}
+                                                		<button type="submit" class="btn btn-danger float-end " name="deleteproduct" value="{{product.id}}">Eyða vöru</button>
+                                        		</form>
+                                        {%endif%}
+						</div>
+					</div>
+					<form id="newproduct" method="post" enctype="multipart/form-data">
+					{%csrf_token%}
+					<div class="input-group mb-3">
+						<input type="text" id="productname" name="productname" {%if product%} value= "{{product.name}}"{%else%}placeholder= "Nafn vöru" {%endif%} aria-label="Nafn vöru" class="form-control" required>
+					</div>
+					<div class ="inpup-group mb-3">
+						<label for="productimage" class="form-label">Mynd af vöru</label>
+						{%if product%}<img src = "media/{{product.prod_img}}" class="thumbnail editpreview"> {%endif%}
+						<input type="file" id="productimage" placeholder="Mynd af vöru" aria-label="Mynd af vöru" name="productimage" class="form-control" {%if not product%}required {%endif%} >
+					</div>
+					<div class="input-group mb-3">
+						<input type="number" placeholder="Verð" aria-label="Verð" name="productprice" {%if product%}value={{product.price}}{%endif%} class="form-control" required >
+						<span class="input-group-text">Kr.</span>
+					</div>
 
-      <div class="modal-footer">
-        <button type="submit" class="btn btn-success" value="Submit">Vista</button>
-	<button type="button" class="btn btn-danger" name="dismiss" data-bs-dismiss="modal">Hætta við</button>
-	</form>
-      </div>
-    </div>
-  </div>
-</div>
+      					<div class="modal-footer">
+						<button type="submit" class="btn btn-success" {%if product%}name="productid" value="{{product.id}}"{%endif%}>Vista</button>
+						<button type="button" class="btn btn-warning" name="dismiss" data-bs-dismiss="modal">Hætta við</button>
+					</form>
+      				</div>
+    			</div>
+		</div>
+	</body>
+</html>

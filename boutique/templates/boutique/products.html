@@ -2,9 +2,11 @@
 {%block title%}KHA Boutique - Products{%endblock%}
 {%block header%}Products{%endblock%}
 {%block content%}
-<button type="button"  class="btn btn-warning" onclick="newProduct(event)">Bæta við vöru</button>
+<div class="d-flex p-2 bd-highlight">
+	<button type="button"  class="btn btn-warning" onclick="newProduct(event)">Bæta við vöru</button>
+</div>
 	{%if products%}
-	<div class="row row-cols-2 row-cols-md-3 row-cols-xs-2 col-lg-5  g-4">
+	<div class="row row-cols-2 row-cols-lg-5 row-cols-md-3 g-4">
     		{%for product in products%}
 		<div class ="col">
 			<div class="card">
@@ -13,7 +15,7 @@
 					<h3 class="card-title">{{product.name}}</h3> 
 					<div class="d-grid gap-2">
 						<h4>{{product.price}} kr.</h4> 
-						<button class="newproduct btn btn-danger btn-block" name="change" value={{product.id}} onclick="editProduct(event,{{product.id}})">Breyta</button>
+						<button class="newproduct btn btn-danger btn-block" data-url="{% url 'newproduct' pnr=product.id %}"  name="change" value={{product.id}} onclick="editProduct(event, this)">Breyta</button>
 					</div>
 				</div>
 			</div>
@@ -21,5 +23,7 @@
     		{%endfor%}
 	</div>
 	{%endif%}
-{%include "boutique/newproduct.html"%}
+<div id="productpopup" class="modal fade" role="dialog">
+	{%include "boutique/newproduct.html"%}
+</div>
 {%endblock%}

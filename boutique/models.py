@@ -10,8 +10,8 @@ class Product(models.Model):
 		return self.name
 
 class Sale(models.Model):
-	buyer = models.ForeignKey(User, on_delete = models.PROTECT)
-	product = models.ForeignKey(Product, on_delete = models.PROTECT)
+	buyer = models.ForeignKey(User, on_delete = models.CASCADE)
+	product = models.ForeignKey(Product, on_delete = models.SET_NULL, null=True)
 	price = models.IntegerField()
 	saletime = models.DateTimeField('date published')
 
@@ -19,7 +19,7 @@ class Sale(models.Model):
 		return "%s : %s" % (self.buyer, self.product)
 
 class Payment(models.Model):
-	payer = models.ForeignKey(User, on_delete = models.PROTECT)
+	payer = models.ForeignKey(User, on_delete = models.CASCADE)
 	amount = models.IntegerField()
 	paytime = models.DateTimeField('date transfered')
 
