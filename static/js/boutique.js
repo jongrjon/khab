@@ -24,4 +24,12 @@ function editProduct(e, el){
 	});
 };
 
+function newPayment(e, fn, ln, uid,amnt){
+	e.preventDefault();
+	$("#payername").text("Skrá innborgun fyrir "+fn+" "+ln);
+	$("#amount").val(Math.abs(amnt));
+	$("#payerid").val(uid);
+	$("#userpaymentpopup").modal("show");
+}
+
 $(document).ready(purchasedItem);

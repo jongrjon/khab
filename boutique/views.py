@@ -61,7 +61,6 @@ def index(request):
 #Personal status view. User can view their purchase history, their previous payments and current debit or credit.
 def users(request, id = None):
     #Checks if logged in account is indeed marked as a person.
-    print(type(request.user.id))
     if request.user.is_superuser or (request.user.groups.filter(name="person").exists() and request.user.id == id):
         if id is None and request.user.is_superuser:
             template = loader.get_template('boutique/users.html')
@@ -89,6 +88,7 @@ def users(request, id = None):
                 'user' : user,
                 'purchase' :purchase,
                 'debt' : debt,
+                'payment': payment,
             }
             return HttpResponse(template.render(context,request))
     else:
@@ -138,6 +138,19 @@ def deleteproduct(request):
             data = request.POST
             pid = data.get("deleteproduct")
             Product.objects.filter(id=pid).delete()
+    return HttpResponseRedirect("/")
+
+def newpayment(request):
+    if request.user.is_superuser:
+        if request.method == "POST":
+            data = request.POST
+            uid = data.get("payerid")
+            amnt =data.get("amount")
+            nxt = data.get("previous_page")
+            user = User.objects.get(id=uid)
+            if user is not None:
+                Payment.objects.create(payer = user, amount = amnt, paytime = datetime.now())
+            httpResponseRedirect(nxt)
     return HttpResponseRedirect("/")
 
 ####################HELPER FUNCTIONS##################################
