@@ -140,10 +140,34 @@ def deleteproduct(request):
             Product.objects.filter(id=pid).delete()
     return HttpResponseRedirect("/")
 
+def payments(request):
+    if request.user.is_superuser:
+        template =loader.get_template('boutique/payments.html')
+        payments = Payment.objects.all().order_by('-paytime')
+        modelusers = User.objects.filter(groups__name__in=['person']).order_by('first_name')
+        users = []
+        for muser in modelusers:
+            user = {
+                'id':muser.id,
+                'first_name' : muser.first_name,
+                'last_name' : muser.last_name,
+                'debt' : getdebt(muser)
+            }
+            users.append(user)
+        context ={
+            'payments' : payments,
+            'users' : users,
+            }
+        return HttpResponse(template.render(context, request))
+    else:
+        return HttpResponseRedirect('/')
+
+
 def newpayment(request):
     if request.user.is_superuser:
         if request.method == "POST":
             data = request.POST
+            pid = data.get("paymentid")
             uid = data.get("payerid")
             amnt =data.get("amount")
             nxt = data.get("previous_page")

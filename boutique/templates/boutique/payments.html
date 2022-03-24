@@ -1,0 +1,102 @@
+{%extends "boutique/base.html"%}
+{%block title%}KHA Boutique{%endblock%}
+{%block header%}User administration{%endblock%}
+{%block content%}
+        <div class="container">
+                <div class="row">
+                        <div class="col">
+                                <h4>Notendur</h4>
+                                <table class="table table-light table-striped table-sm ">
+                                        <thead>
+                                                <tr >
+                                                        <th scope="col">Notandi</th>
+                                                        <th scope="col">Staða</th>
+                                                </tr>
+                                        </thead>
+                                        <tbody>
+                                                {%for user in users%}
+                                                <tr onClick="newPayment(event,'{{user.first_name}}','{{user.last_name}}',{{user.id}},{{user.debt}})" >
+							<th scope="row">{{ pur.saletime|date:"d.m.y" }} {{user.first_name}} {{user.last_name}}</th>
+							<td>{{user.debt}}</td>
+                                                </tr>
+                                                {%endfor%}
+                                        </tbody>
+                                </table>
+                        </div>
+                        <div class="col">
+                                <h4>Innborganir</h4>
+                                 <table class="table table-light table-striped table-sm ">
+                                        <thead>
+                                                <tr>
+                                                        <th scope="col">Tímasetning</th>
+							<th scope="col">Notandi</th>
+                                                        <th scope="col">Upphæð</th>
+                                                </tr>
+                                        </thead>
+                                        <tbody>
+                                                {%for payment in payments%}
+						<tr onClick="editPayment(event,'{{payment.payer.first_name}}','{{payment.payer.last_name}}',{{payment.id}},{{payment.amount}})">
+                                                        <th scope="row">{{ payment.paytime|date:"d.m.y" }} {{ payment.paytime|time:"H:i" }}</th>
+							<td>{{payment.payer.first_name}} {{payment.payer.last_name}}</td>
+							<td>{{payment.amount}}</td>
+                                                </tr>
+                                                {%endfor%}
+                                        </tbody>
+                                </table>
+                        </div>
+                </div>
+        </div>
+
+        <div id="userpaymentpopup" class="modal fade" role="dialog">
+                <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                                <div class="modal-body">
+                                        <h3 id="payername"></h3>
+                                        <form id="newpayment" method="post" action="newpayment" enctype="multipart/form-data">
+                                        {%csrf_token%}
+                                        <div class="input-group mb-3">
+                                                <input type="number" id="amount" name="amount" value= "" aria-label="Upphæð" class="form-control" required>
+                                                <span class="input-group-text">Kr.</span>
+                                        </div>
+                                        <div class="modal-footer">
+                                                <input type="hidden" id="previous_page" name="previous_page" value="/payments">
+                                                <button type="submit" id="payerid" class="btn btn-success" name="payerid" value="">Skrá innborgun</button>
+                                                <button type="button" class="btn btn-warning" name="dismiss" data-bs-dismiss="modal">Hætta við</button>
+					</div>
+					</form>
+                                </div>
+                        </div>
+                </div>
+        </div>
+	<div id="editpaymentpopup" class="modal fade" role="dialog">
+                <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                                <div class="modal-body">
+					 <div class="row">
+                                                <div class="col-6">
+							<h3>Breyta innborgun</h4>
+							<h4 id="editpayername" ></h4>
+                                                </div>
+                                                <div class ="col-6">
+                                                        <form id="deletepayment" action="deletepayment" form="deletepayment"  method="post">
+                                                        {%csrf_token%}
+                                                                <button type="submit" id="paymentid" class="btn btn-danger float-end " name="deletepayment" value="">Eyða innborgun</button>
+                                                        </form>
+                                                </div>
+                                        </div>
+                                        <form id="editpayment" method="post" action="newpayment" enctype="multipart/form-data">
+                                        {%csrf_token%}
+                                        <div class="input-group mb-3">
+                                                <input type="number" id="editamount" name="amount" value= "" aria-label="Upphæð" class="form-control" required>
+                                                <span class="input-group-text">Kr.</span>
+                                        </div>
+                                        <div class="modal-footer">
+                                                <input type="hidden" id="previous_page" name="previous_page" value="/payments">
+                                                <button type="submit" id="paymentid" class="btn btn-success" name="paymentid" value="">Breyta innborgun</button>
+                                                <button type="button" class="btn btn-warning" name="dismiss" data-bs-dismiss="modal">Hætta við</button>
+                                        </form>
+                                </div>
+                        </div>
+                </div>
+        </div>
+{%endblock%}
