@@ -32,4 +32,12 @@ function newPayment(e, fn, ln, uid,amnt){
 	$("#userpaymentpopup").modal("show");
 }
 
+function editPayment(e, fn, ln, pid, amnt){
+	e.preventDefault();
+	$("#editpayername").text(fn+" "+ln);
+	$("#editamount").val(amnt);
+	$("#paymentid").val(pid);
+	$("#editpaymentpopup").modal("show");
+}
+
 $(document).ready(purchasedItem);
