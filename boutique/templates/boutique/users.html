@@ -1,0 +1,39 @@
+{%extends "boutique/base.html"%}
+{%block title%}KHA Boutique{%endblock%}
+{%block header%}User administration{%endblock%}
+{%block content%}
+{%if users%}
+	<ul class="list-group">
+	{%for user in users%}
+		<li class="list-group-item d-flex justify-content-between align-items-start">
+			<div class="ms-2 me-auto">
+				<div class ="fw-bold"><a href="users/{{user.id}}" class="userlink" >{{user.first_name}} {{user.last_name}}</a></div>
+				<span class="badge {%if user.debt >= 0 %}bg-success{%else%}bg-danger{%endif%}">{{user.debt}}</span>
+			</div>
+			<button class="newpayment btn btn-success" onClick="newPayment(event,'{{user.first_name}}','{{user.last_name}}',{{user.id}},{{user.debt}})">Skrá innborgun</button>
+		</li>
+	{% endfor %}
+	</ul>
+	<div id="userpaymentpopup" class="modal fade" role="dialog">
+		<div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                                <div class="modal-body">
+					<h3 id="payername"></h3>
+                                        <form id="newpayment" method="post" action="newpayment" enctype="multipart/form-data">
+                                        {%csrf_token%}
+                                        <div class="input-group mb-3">
+                                                <input type="number" id="amount" name="amount" value= "" aria-label="Upphæð" class="form-control" required>
+						<span class="input-group-text">Kr.</span>
+                                        </div>
+                                        <div class="modal-footer">
+						<input type="hidden" id="previous_page" name="previous_page" value="/users">
+						<button type="submit" id="payerid" class="btn btn-success" name="payerid" value="">Skrá innborgun</button>
+                                                <button type="button" class="btn btn-warning" name="dismiss" data-bs-dismiss="modal">Hætta við</button>
+                                        </form>
+                                </div>
+                        </div>
+                </div>
+	</div>
+{% endif %}
+{%endblock%}
+

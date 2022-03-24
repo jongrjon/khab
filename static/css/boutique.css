@@ -1,0 +1,26 @@
+header{
+	background-color:#a52417;
+}
+
+.thumbnail{
+	/*max-width:150px;
+	max-height:150px;*/
+	aspect-ratio:1;
+	object-fit: cover;
+}
+
+.editpreview{
+	max-width:200px;
+	max-height:200px;
+	aspect-ratio:1;
+	object-fit: cover;
+}
+
+.userlink{
+	color:#000;
+	text-decoration:none;
+}
+
+.userlink:hover{
+	color:#a52417;
+}

@@ -1,31 +1,57 @@
-<head>{%render header.html%}</head>
+{%extends "boutique/base.html"%}
+{%block title%}KHA Boutique{%endblock%}
+{%block header%}{{user.first_name}} {{user.last_name}}{%endblock%}
+{%block content%}
 <form method="post">
 {% csrf_token %}
 {%if users%}
-    <select name="buyer">
-        {%for user in users%}
-        <option value="{{user.id}}" name="user">{{user.first_name}} {{user.last_name}}</option>
-        {%endfor%}
-    </select>
-
+	<div class="d-flex p-2 bd-highlight"> 
+		<select class="form-select" name="buyer" required oninvalid="this.setCustomValidity('Veldu nafnið þitt')" oninput="setCustomValidity('')" >
+			<option value="" disabled selected hidden> Veldu starfsmann</option>
+			{%for user in users%}
+			<option value="{{user.id}}" name="user">{{user.first_name}} {{user.last_name}}</option>
+			{%endfor%}
+		</select>
+	</div>
+		
 {%endif%}
+
 {%if response%}
-    {%if response.status == "Success"%}<h2>{{response.message}}</h2>{%endif%}
-    {%if response.status == "Failed"%}<h2>Kaup tókust ekki. hafið samband við vefstjóra.</h2>{%endif%}
+	<div id="purchasepopup" class="modal fade" role="dialog">
+		<div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                                <div class="modal-body">
+					<h3>{%if response.status == "Success"%}Kaup tókust!{%else%}Kaup tókust ekki!{%endif%}</h3>
+					<p>{{response.message}}</p>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-warning" name="dismiss" data-bs-dismiss="modal">Loka</button>
+                                </div>
+                        </div>
+                </div>
+	</div>
 {%endif%}
 {% if products %}
-    <ul>
-    {% for prod in products %}
-        <div id ="{{prod.id}}">
-            <img src="media/{{ prod.prod_img }}">
-            <h3>{{prod.price}} kr.</h3>
-            
-                <button class="button is-danger" name="purchase" value={{prod.id}}><i class="bi bi-cart-check"></i>Kaupa</button>
-            
-        </div>
-    {% endfor %}
-    </ul>
+	<div class="row row-cols-2 row-cols-lg-5 row-cols-md-3 g-4">
+		{% for product in products %}
+		<div id ="{{product.id}}" class="col">
+			<div class="card">
+				<img src="media/{{ product.prod_img }}" class="card-img-top thumbnail">
+				<div class="card-body">
+					<h3 class="card-title">{{product.name}}</h3>
+					<div class="d-grid gap-2">
+						<h4>{{product.price}} kr.</h4>
+						<button class="btn btn-danger btn-block" name="purchase" value="{{product.id}}">Kaupa</button>
+					</div>
+				</div>
+			</div>
+		</div>
+    		{% endfor %}
+	</div>
 {% else %}
-    <p>Búðin er tóm</p>
+	<div class="alert alert-warning" role="alert">
+		<h2>Búðin er tóm!</h2>
+	</div>
 {% endif %}
 </form>
+{%endblock%}

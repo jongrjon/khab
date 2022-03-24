@@ -1,6 +1,52 @@
-<h1>{{user.first_name}} {{user.last_name}}</h1>
-<h2>{{user.email}}</h2>
-<h3>Skuldastaða: {{debt}} kr</h3>
-{%for p in purchase%}
-<div>{{p.product}} - {{p.price}} kr - {{p.saletime}}</div>
-{% endfor %}
+{%extends "boutique/base.html"%}
+{%block title%}KHA Boutique{%endblock%}
+{%block header%}{{user.first_name}} {{user.last_name}}{%endblock%}
+{%block content%}
+	<h1>{{user.first_name}} {{user.last_name}}</h1>
+	<h2>{{user.email}}</h2>
+	<h3>Skuldastaða: {{debt}} kr</h3>
+	<div class="container">
+		<div class="row">
+			<div class="col">
+				<h4>Keyptar vörur</h4>
+				<table class="table table-light table-striped table-sm ">
+  					<thead>
+    						<tr>
+      							<th scope="col">Tímasetning</th>
+      							<th scope="col">Vara</th>
+      							<th scope="col">Verð</th>
+    						</tr>
+  					</thead>
+  					<tbody>
+						{%for pur in purchase%}
+    						<tr>
+							<th scope="row">{{ pur.saletime|date:"d.m.y" }} {{ pur.saletime|time:"H:i" }}</th>
+      							<td>{{ pur.product|default_if_none:"Vara hætt" }}</td>
+      							<td>{{pur.price}} kr.</td>
+    						</tr>
+						{%endfor%}
+					</tbody>
+				</table>
+			</div>
+			<div class="col">
+				<h4>Innborganir</h4>
+				 <table class="table table-light table-striped table-sm ">
+                                        <thead>
+                                                <tr>
+                                                        <th scope="col">Tímasetning</th>
+                                                        <th scope="col">Upphæð</th>
+                                                </tr>
+                                        </thead>
+                                        <tbody>
+                                                {%for paid in payment%}
+                                                <tr>
+                                                        <th scope="row">{{ paid.paytime|date:"d.m.y" }} {{ paid.paytime|time:"H:i" }}</th>
+                                                        <td>{{ paid.amount}}</td>
+                                                </tr>
+                                                {%endfor%}
+                                        </tbody>
+                                </table>
+			</div>
+		</div>
+	</div>
+{%endblock%}
