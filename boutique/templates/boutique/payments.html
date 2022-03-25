@@ -17,7 +17,7 @@
                                                 {%for user in users%}
                                                 <tr onClick="newPayment(event,'{{user.first_name}}','{{user.last_name}}',{{user.id}},{{user.debt}})" >
 							<th scope="row">{{ pur.saletime|date:"d.m.y" }} {{user.first_name}} {{user.last_name}}</th>
-							<td>{{user.debt}}</td>
+							<td class="text-end">{{user.debt}} Kr.</td>
                                                 </tr>
                                                 {%endfor%}
                                         </tbody>
@@ -38,7 +38,7 @@
 						<tr onClick="editPayment(event,'{{payment.payer.first_name}}','{{payment.payer.last_name}}',{{payment.id}},{{payment.amount}})">
                                                         <th scope="row">{{ payment.paytime|date:"d.m.y" }} {{ payment.paytime|time:"H:i" }}</th>
 							<td>{{payment.payer.first_name}} {{payment.payer.last_name}}</td>
-							<td>{{payment.amount}}</td>
+							<td class="text-end">{{payment.amount}} Kr.</td>
                                                 </tr>
                                                 {%endfor%}
                                         </tbody>
@@ -80,11 +80,11 @@
                                                 <div class ="col-6">
                                                         <form id="deletepayment" action="deletepayment" form="deletepayment"  method="post">
                                                         {%csrf_token%}
-                                                                <button type="submit" id="paymentid" class="btn btn-danger float-end " name="deletepayment" value="">Eyða innborgun</button>
+                                                                <button type="submit" id="deletepaymentid" class="btn btn-danger float-end " name="deletepayment" value="">Eyða innborgun</button>
                                                         </form>
                                                 </div>
                                         </div>
-                                        <form id="editpayment" method="post" action="newpayment" enctype="multipart/form-data">
+                                        <form id="editpayment" method="post" action="editpayment" enctype="multipart/form-data">
                                         {%csrf_token%}
                                         <div class="input-group mb-3">
                                                 <input type="number" id="editamount" name="amount" value= "" aria-label="Upphæð" class="form-control" required>

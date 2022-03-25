@@ -167,7 +167,6 @@ def newpayment(request):
     if request.user.is_superuser:
         if request.method == "POST":
             data = request.POST
-            pid = data.get("paymentid")
             uid = data.get("payerid")
             amnt =data.get("amount")
             nxt = data.get("previous_page")
@@ -176,6 +175,25 @@ def newpayment(request):
                 Payment.objects.create(payer = user, amount = amnt, paytime = datetime.now())
             return HttpResponseRedirect(nxt)
     return HttpResponseRedirect("/")
+
+def editpayment(request):
+    if request.user.is_superuser:
+        if request.method == "POST":
+            data = request.POST
+            pid = data.get("paymentid")
+            amount = data.get("amount")
+            Payment.objects.filter(id=pid).update(amount = amount)
+            return HttpResponseRedirect('/payments')
+    return HttpResponseRedirect("/")
+
+def deletepayment(request):
+    if request.user.is_superuser:
+        if request.method == "POST":
+            data = request.POST
+            pid = data.get("deletepayment")
+            Payment.objects.filter(id=pid).delete()
+            return HttpResponseRedirect('/payments')
+    return HttpResponseRedirect('/')
 
 ####################HELPER FUNCTIONS##################################
 def getdebt(user):

@@ -14,7 +14,7 @@
     						<tr>
       							<th scope="col">Tímasetning</th>
       							<th scope="col">Vara</th>
-      							<th scope="col">Verð</th>
+      							<th scope="col" class="text-end">Verð</th>
     						</tr>
   					</thead>
   					<tbody>
@@ -22,7 +22,7 @@
     						<tr>
 							<th scope="row">{{ pur.saletime|date:"d.m.y" }} {{ pur.saletime|time:"H:i" }}</th>
       							<td>{{ pur.product|default_if_none:"Vara hætt" }}</td>
-      							<td>{{pur.price}} kr.</td>
+      							<td class="text-end">{{pur.price}} Kr.</td>
     						</tr>
 						{%endfor%}
 					</tbody>
@@ -34,14 +34,14 @@
                                         <thead>
                                                 <tr>
                                                         <th scope="col">Tímasetning</th>
-                                                        <th scope="col">Upphæð</th>
+							<th scope="col" class="text-end">Upphæð</th>
                                                 </tr>
                                         </thead>
                                         <tbody>
                                                 {%for paid in payment%}
                                                 <tr>
                                                         <th scope="row">{{ paid.paytime|date:"d.m.y" }} {{ paid.paytime|time:"H:i" }}</th>
-                                                        <td>{{ paid.amount}}</td>
+                                                        <td class="text-end">{{ paid.amount}} Kr.</td>
                                                 </tr>
                                                 {%endfor%}
                                         </tbody>
