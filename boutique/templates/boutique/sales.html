@@ -1,0 +1,84 @@
+{%extends "boutique/base.html"%}
+{%block title%}KHA Boutique{%endblock%}
+{%block header%}User administration{%endblock%}
+{%block content%}
+        <div class="container">
+                <div class="row">
+                        <div class="col">
+                                <h4>Sölutölur</h4>
+                                <table class="table table-light table-striped table-sm ">
+                                        <thead>
+                                                <tr >
+                                                        <th scope="col">Vara</th>
+                                                        <th scope="col" class="text-end">Fjöldi</th>
+                                                </tr>
+                                        </thead>
+                                        <tbody>
+                                                {%for product in products%}
+                                                <tr>
+                                                        <th scope="row">{{product.name}}</th>
+                                                        <td class="text-end">{{product.sales}} Kr.</td>
+                                                </tr>
+                                                {%endfor%}
+                                        </tbody>
+                                </table>
+                        </div>
+                        <div class="col">
+                                <h4>Söluyfirlit</h4>
+                                 <table class="table table-light table-striped table-sm ">
+                                        <thead>
+                                                <tr>
+                                                        <th scope="col">Tímasetning</th>
+                                                        <th scope="col">Notandi</th>
+                                                        <th scope="col">Vara</th>
+							<th scope="col" class="text-end">Verð</th>
+                                                </tr>
+                                        </thead>
+                                        <tbody>
+                                                {%for sale in sales%}
+						<tr onClick="editSale(event,'{{sale.buyer.first_name}}','{{sale.buyer.last_name}}',{{sale.id}},{{sale.amount}},'{{sale.product|default_if_none:'Vara hætt'}}')">
+                                                        <th scope="row">{{sale.saletime|date:"d.m.y"}} {{sale.saletime|time:"H:i" }}</th>
+                                                        <td>{{sale.buyer.first_name}} {{sale.buyer.last_name}}</td>
+							<td>{{sale.product|default_if_none:"Vara hætt"}}</td>
+                                                        <td class="text-end">{{sale.amount}} Kr.</td>
+                                                </tr>
+                                                {%endfor%}
+                                        </tbody>
+                                </table>
+                        </div>
+                </div>
+        </div>
+        <div id="editsalepopup" class="modal fade" role="dialog">
+                <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                                <div class="modal-body">
+                                         <div class="row">
+                                                <div class="col-6">
+                                                        <h3>Breyta sölu</h4>
+                                                        <h4 id="editbuyername"></h4>
+                                                </div>
+                                                <div class ="col-6">
+                                                        <form id="deletesale" action="deletesale" form="deletesale"  method="post">
+                                                        {%csrf_token%}
+                                                                <button type="submit" id="deletesaleid" class="btn btn-danger float-end " name="deletesale" value="">Eyða sölu</button>
+                                                        </form>
+                                                </div>
+                                        </div>
+                                        <form id="editsale" method="post" action="editsale" enctype="multipart/form-data">
+                                        {%csrf_token%}
+					<div class="input-group mb-3">
+						<input type="text" id="editproduct" name="product" value= "" aria-label="Nafn vöru" class="form-control" required>
+					</div>
+                                        <div class="input-group mb-3">
+                                                <input type="number" id="editamount" name="amount" value= "" aria-label="Upphæð" class="form-control" required>
+                                                <span class="input-group-text">Kr.</span>
+                                        </div>
+                                        <div class="modal-footer">
+                                                <button type="submit" id="saleid" class="btn btn-success" name="saleid" value="">Breyta sölu</button>
+                                                <button type="button" class="btn btn-warning" name="dismiss" data-bs-dismiss="modal">Hætta við</button>
+                                        </form>
+                                </div>
+                        </div>
+                </div>
+        </div>
+

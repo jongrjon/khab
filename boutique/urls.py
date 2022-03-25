@@ -11,5 +11,7 @@ urlpatterns = [
     path('users', views.users, name='users'),
     path('users/<int:id>',views.users, name='users'),
     path('newpayment',views.newpayment, name='newpayment'),
+    path('editpayment', views.editpayment, name='editpayment'),
+    path('deletepayment', views.deletepayment, name='deletepayment'),
     path('payments', views.payments, name='payments'),
 ]

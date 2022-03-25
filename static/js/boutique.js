@@ -37,6 +37,7 @@ function editPayment(e, fn, ln, pid, amnt){
 	$("#editpayername").text(fn+" "+ln);
 	$("#editamount").val(amnt);
 	$("#paymentid").val(pid);
+	$("#deletepaymentid").val(pid)
 	$("#editpaymentpopup").modal("show");
 }
 
