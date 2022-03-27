@@ -3,7 +3,7 @@ from django.contrib.auth.models import User, Group
 from datetime import datetime
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
-from django.db.models import Sum
+from django.db.models import Sum, Count
 from .models import Product, Sale, Payment
 
 #Index view, Main Boutique. Requires login.
@@ -94,6 +94,39 @@ def users(request, id = None):
     else:
         return HttpResponseRedirect('/')
 
+#Admin view for managing sales, showing every unique sale as well as sales numbers for products
+def sales(request):
+    if request.user.is_superuser:
+        template = loader.get_template('boutique/sales.html')
+        sales = Sale.objects.all().order_by('-saletime')
+        products = Product.objects.annotate(salenum = Count('sale', distinct = True))
+        context = {
+            'sales' : sales,
+            'products' : products,
+        }
+        return HttpResponse(template.render(context, request))
+    else:
+        return HttpResponseRedirect('/')
+
+def editsale(request):
+    if request.user.is_superuser:
+        if request.method == "POST":
+            data = request.POST
+            sid = data.get("saleid")
+            amount = data.get("amount")
+            Sale.objects.filter(id = sid).update(price = amount)
+            return HttpResponseRedirect('/sales')
+    return HttpResponseRedirect("/")
+
+def deletesale(request):
+    if request.user.is_superuser:
+        if request.method == "POST":
+            data = request.POST
+            sid = data.get("deletesale")
+            Sale.objects.filter(id = sid).delete()
+            return HttpResponseRedirect('/sales')
+    return HttpResponseRedirect('/')
+
 #Admin view for managing products. Add, edit or remove products from the store. 
 def products(request):
     if request.user.is_superuser:
@@ -111,7 +144,7 @@ def products(request):
                 tempprod = Product.objects.get(id = pid)
                 img = tempprod.prod_img
             pprice = data.get("productprice")
-            Product.objects.update_or_create(id = pid, defaults ={'name' : pname,'prod_img' : img, 'price' : pprice})
+            Product.objects.update_or_create(id = pid, defaults = {'name' : pname,'prod_img' : img, 'price' : pprice})
         return HttpResponse(template.render(context,request))
     else:
         return HttpResponseRedirect('/')
@@ -137,14 +170,14 @@ def deleteproduct(request):
         if request.method == "POST":
             data = request.POST
             pid = data.get("deleteproduct")
-            Product.objects.filter(id=pid).delete()
+            Product.objects.filter(id = pid).delete()
     return HttpResponseRedirect("/")
 
 def payments(request):
     if request.user.is_superuser:
         template =loader.get_template('boutique/payments.html')
         payments = Payment.objects.all().order_by('-paytime')
-        modelusers = User.objects.filter(groups__name__in=['person']).order_by('first_name')
+        modelusers = User.objects.filter(groups__name__in = ['person']).order_by('first_name')
         users = []
         for muser in modelusers:
             user = {
@@ -154,7 +187,7 @@ def payments(request):
                 'debt' : getdebt(muser)
             }
             users.append(user)
-        context ={
+        context = {
             'payments' : payments,
             'users' : users,
             }
@@ -170,7 +203,7 @@ def newpayment(request):
             uid = data.get("payerid")
             amnt =data.get("amount")
             nxt = data.get("previous_page")
-            user = User.objects.get(id=uid)
+            user = User.objects.get(id = uid)
             if user is not None:
                 Payment.objects.create(payer = user, amount = amnt, paytime = datetime.now())
             return HttpResponseRedirect(nxt)
@@ -182,7 +215,7 @@ def editpayment(request):
             data = request.POST
             pid = data.get("paymentid")
             amount = data.get("amount")
-            Payment.objects.filter(id=pid).update(amount = amount)
+            Payment.objects.filter(id = pid).update(amount = amount)
             return HttpResponseRedirect('/payments')
     return HttpResponseRedirect("/")
 
@@ -191,7 +224,7 @@ def deletepayment(request):
         if request.method == "POST":
             data = request.POST
             pid = data.get("deletepayment")
-            Payment.objects.filter(id=pid).delete()
+            Payment.objects.filter(id = pid).delete()
             return HttpResponseRedirect('/payments')
     return HttpResponseRedirect('/')
 

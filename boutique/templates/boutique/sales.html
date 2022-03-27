@@ -1,5 +1,5 @@
 {%extends "boutique/base.html"%}
-{%block title%}KHA Boutique{%endblock%}
+{%block title%}KHAB -Sölur{%endblock%}
 {%block header%}User administration{%endblock%}
 {%block content%}
         <div class="container">
@@ -17,7 +17,7 @@
                                                 {%for product in products%}
                                                 <tr>
                                                         <th scope="row">{{product.name}}</th>
-                                                        <td class="text-end">{{product.sales}} Kr.</td>
+                                                        <td class="text-end">{{product.salenum}}</td>
                                                 </tr>
                                                 {%endfor%}
                                         </tbody>
@@ -36,11 +36,11 @@
                                         </thead>
                                         <tbody>
                                                 {%for sale in sales%}
-						<tr onClick="editSale(event,'{{sale.buyer.first_name}}','{{sale.buyer.last_name}}',{{sale.id}},{{sale.amount}},'{{sale.product|default_if_none:'Vara hætt'}}')">
+						<tr onClick="editSale(event,'{{sale.buyer.first_name}}','{{sale.buyer.last_name}}',{{sale.id}},{{sale.price}},'{{sale.product.name|default_if_none:'Vara hætt'}}')">
                                                         <th scope="row">{{sale.saletime|date:"d.m.y"}} {{sale.saletime|time:"H:i" }}</th>
                                                         <td>{{sale.buyer.first_name}} {{sale.buyer.last_name}}</td>
 							<td>{{sale.product|default_if_none:"Vara hætt"}}</td>
-                                                        <td class="text-end">{{sale.amount}} Kr.</td>
+                                                        <td class="text-end">{{sale.price}} Kr.</td>
                                                 </tr>
                                                 {%endfor%}
                                         </tbody>
@@ -81,4 +81,5 @@
                         </div>
                 </div>
         </div>
+{%endblock%}
 
