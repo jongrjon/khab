@@ -1,3 +1,5 @@
+from django.utils.encoding import force_str
+from django.utils.http import urlsafe_base64_decode
 from django.shortcuts import render
 from django.contrib.auth.models import User, Group
 from datetime import datetime
@@ -5,6 +7,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 from django.db.models import Sum, Count
 from .models import Product, Sale, Payment
+from .tokens import account_activation_token
 
 #Index view, Main Boutique. Requires login.
 def index(request):
@@ -207,7 +210,8 @@ def newpayment(request):
             if user is not None:
                 Payment.objects.create(payer = user, amount = amnt, paytime = datetime.now())
             return HttpResponseRedirect(nxt)
-    return HttpResponseRedirect("/")
+    else:
+        return HttpResponseRedirect("/")
 
 def editpayment(request):
     if request.user.is_superuser:
@@ -217,7 +221,8 @@ def editpayment(request):
             amount = data.get("amount")
             Payment.objects.filter(id = pid).update(amount = amount)
             return HttpResponseRedirect('/payments')
-    return HttpResponseRedirect("/")
+    else:
+        return HttpResponseRedirect("/")
 
 def deletepayment(request):
     if request.user.is_superuser:
@@ -226,7 +231,35 @@ def deletepayment(request):
             pid = data.get("deletepayment")
             Payment.objects.filter(id = pid).delete()
             return HttpResponseRedirect('/payments')
-    return HttpResponseRedirect('/')
+    else:
+        return HttpResponseRedirect('/')
+
+def createinvite(request):
+    if request.user.is_superuser:
+        if request.method == "POST":
+            data = request.POST
+            email = data.get("email")
+            Invite.objects.update_or_create(email = email, defaults = {'timeout' : datetime.now()})
+            return HttpResponseRedirect('/payments')
+    else:
+        return HttpResponseRedirect('/')
+
+class Register(View):
+    def get(self, request, uidb64, token):
+        try:
+            uid = force_text(urlsafe_base64_decode(uidb64))
+            invite = Invite.objects.get(pk=uid)
+        except (TypeError, ValueError, OverflowError, Invite.DoesNotExist):
+            invite = None
+
+        if invite is not None and invite_token.check_token(invite, token):
+            invite.profile.email_confirmed = True
+            user.save()
+            login(request, user)
+            return HttpResponseRedirect('/payments')
+        else:
+            # invalid link
+            return HttpResponseRedirect("/")
 
 ####################HELPER FUNCTIONS##################################
 def getdebt(user):

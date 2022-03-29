@@ -17,4 +17,6 @@ urlpatterns = [
     path('editpayment', views.editpayment, name='editpayment'),
     path('deletepayment', views.deletepayment, name='deletepayment'),
     path('payments', views.payments, name='payments'),
+    path(r'^register/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
+                views.Register.AsView(), name='register'),
 ]
