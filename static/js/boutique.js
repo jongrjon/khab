@@ -57,4 +57,11 @@ function editSale(e, fn, ln, sid, amnt, pn){
 	$("#editsalepopup").modal("show");
 }
 
+function newInvite(e){
+        e.preventDefault();
+        var $popup = $("#productpopup");
+        $("#invitepopup").modal("show");
+};
+
+
 $(document).ready(purchasedItem);

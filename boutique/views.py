@@ -64,6 +64,7 @@ def users(request, id = None):
     if request.user.is_superuser or (request.user.groups.filter(name="person").exists() and request.user.id == id):
         if id is None and request.user.is_superuser:
             template = loader.get_template('boutique/users.html')
+            invites = Invite.objects.all().order_by('invited')
             modelusers = User.objects.filter(groups__name__in=['person','vendor'])
             users = []
             for muser in modelusers:
@@ -76,6 +77,7 @@ def users(request, id = None):
                 users.append(user)
             context = {
                 'users' : users,
+                'invites' :invites,
             }
             return HttpResponse(template.render(context, request))
         else:
@@ -195,7 +197,6 @@ def payments(request):
     else:
         return HttpResponseRedirect('/')
 
-
 def newpayment(request):
     if request.user.is_superuser:
         if request.method == "POST":
@@ -227,6 +228,18 @@ def deletepayment(request):
             Payment.objects.filter(id = pid).delete()
             return HttpResponseRedirect('/payments')
     return HttpResponseRedirect('/')
+
+def newinvite(request):
+    if request.user.is_superuser:
+        if request.method == "POST":
+            data = request.POST
+            email = data.get("email")
+            existing = User.objects.get(email = email)
+            if email is not None and existing is None:
+                Invite.objects.update_or_create(invited = email, defaults = {'timeout': datetime.now()})
+        return HttpResponseRedirect('/users')
+    else:
+        return HttpResponseRedirect('/')
 
 ####################HELPER FUNCTIONS##################################
 def getdebt(user):

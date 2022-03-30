@@ -17,4 +17,5 @@ urlpatterns = [
     path('editpayment', views.editpayment, name='editpayment'),
     path('deletepayment', views.deletepayment, name='deletepayment'),
     path('payments', views.payments, name='payments'),
+    path('newinvite',views.newinvite, name='newinvite'),
 ]
