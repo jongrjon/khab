@@ -6,9 +6,8 @@ from datetime import datetime
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 from django.db.models import Sum, Count
-from .models import Product, Sale, Payment
-from .tokens import account_activation_token
-
+from .models import Product, Sale, Payment, Invite
+from khab.inviteTokens import invite_token_generator
 #Index view, Main Boutique. Requires login.
 def index(request):
     products = Product.objects.all()
