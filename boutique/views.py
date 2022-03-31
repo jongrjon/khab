@@ -6,6 +6,10 @@ from django.template import loader
 from django.db.models import Sum, Count
 from .models import Product, Sale, Payment, Invite
 from khab.inviteTokens import invite_token_generator
+from django.core.mail import EmailMultiAlternatives
+from django.contrib.sites.shortcuts import get_current_site
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
 #Index view, Main Boutique. Requires login.
 def index(request):
     products = Product.objects.all()
@@ -233,13 +237,33 @@ def newinvite(request):
     if request.user.is_superuser:
         if request.method == "POST":
             data = request.POST
-            email = data.get("email")
-            existing = User.objects.get(email = email)
-            if email is not None and existing is None:
+            email = data.get("email") 
+            if email is not None and not User.objects.filter(email = email).exists():
                 Invite.objects.update_or_create(invited = email, defaults = {'timeout': datetime.now()})
+                invite = Invite.objects.get(invited = email)
+                current_site = get_current_site(request)
+                site_name = current_site.name
+                domain = current_site.domain
+                context = {
+                    'email': email,
+                    'domain': domain,
+                    'site_name': site_name,
+                    'uid': urlsafe_base64_encode(force_bytes(invite.pk)),
+                    'token': invite_token_generator.make_token(invite),
+                    'protocol': 'http',
+                }
+                subject = "Skráning í KHA Boutique"
+                body = loader.render_to_string('registration/invite_email.html', context)
+                from_email = None
+                email_message = EmailMultiAlternatives(subject, body, from_email, [email])
+                email_message.send()
+                
         return HttpResponseRedirect('/users')
     else:
         return HttpResponseRedirect('/')
+
+def register(request):
+    return HttpResponseRedirect('/')
 
 ####################HELPER FUNCTIONS##################################
 def getdebt(user):
