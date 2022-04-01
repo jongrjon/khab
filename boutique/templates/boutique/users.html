@@ -2,8 +2,23 @@
 {%block title%}KHAB - Users{%endblock%}
 {%block header%}User administration{%endblock%}
 {%block content%}
-<button class="btn btn-success" onclick="newInvite(event)">Bjóða notanda</button
+<button class="btn btn-warning mb-3" onClick="newInvite(event)">Bjóða notanda</button>
+{%if invites%}
+<ul class="list-group">
+	<h4>Boðnir notendur</h4>
+        {%for invite in invites%}
+                <li class="list-group-item d-flex justify-content-between align-items-start">
+                        <div class="ms-2 me-auto">
+                                <div class ="fw-bold">{{invite.invited}}</div>
+                                <span class="badge bg-warning">{{invite.timeout}}</span>
+                        </div>
+                        <button class="deleteinvite btn btn-danger">Eyða boði</button>
+                </li>
+        {% endfor %}
+        </ul>
+{%endif%}
 {%if users%}
+	<h4>Notendur</h4>
 	<ul class="list-group">
 	{%for user in users%}
 		<li class="list-group-item d-flex justify-content-between align-items-start">
@@ -30,29 +45,31 @@
 						<input type="hidden" id="previous_page" name="previous_page" value="/users">
 						<button type="submit" id="payerid" class="btn btn-success" name="payerid" value="">Skrá innborgun</button>
                                                 <button type="button" class="btn btn-warning" name="dismiss" data-bs-dismiss="modal">Hætta við</button>
+					</div>
                                         </form>
                                 </div>
                         </div>
                 </div>
 	</div>
-	<div id="invitepopup" class="modal fade" role="dialog">
-		<div class="modal-dialog modal-lg">
+        <div id="invitepopup" class="modal fade" role="dialog">
+                <div class="modal-dialog modal-lg">
                         <div class="modal-content">
                                 <div class="modal-body">
-					<h3 id="payername"></h3>
-                                        <form id="newinvite" method="post" action="createinvite" enctype="multipart/form-data">
+                                        <h3 id="invite">Bjóða nýjum notanda</h3>
+                                        <form id="newinvite" method="post" action="newinvite" enctype="multipart/form-data">
                                         {%csrf_token%}
                                         <div class="input-group mb-3">
-                                                <input type="email" id="email" name="email" aria-label="Email" class="form-control" placeholder="notandi@unak.is" required>
+                                                <input type="email" id="email" name="email" aria-label="Notandi" class="form-control" required>
                                         </div>
                                         <div class="modal-footer">
-						<button type="submit" class="btn btn-success" name="invite" value="">Bjóða notanda</button>
+						<button type="submit" class="btn btn-success">Skrá notanda</button>
                                                 <button type="button" class="btn btn-warning" name="dismiss" data-bs-dismiss="modal">Hætta við</button>
-                                        </form>
+					</div>
+					</form>
                                 </div>
                         </div>
                 </div>
-	</div>
+        </div>
 {% endif %}
 {%endblock%}
 
