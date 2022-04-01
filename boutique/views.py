@@ -262,8 +262,10 @@ def newinvite(request):
     else:
         return HttpResponseRedirect('/')
 
-def register(request):
-    return HttpResponseRedirect('/')
+def register(request, **kwargs):
+    template = loader.get_template('registration/register.html')
+    context= {}
+    return HttpResponse(template.render(context, request))
 
 ####################HELPER FUNCTIONS##################################
 def getdebt(user):
