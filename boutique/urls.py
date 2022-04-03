@@ -18,4 +18,6 @@ urlpatterns = [
     path('deletepayment', views.deletepayment, name='deletepayment'),
     path('payments', views.payments, name='payments'),
     path('newinvite',views.newinvite, name='newinvite'),
+    path('register/<uidb64>/<token>/', views.register, name='register'),
+    path('noregister', views.noregister, name='noregister'),
 ]

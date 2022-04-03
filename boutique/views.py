@@ -1,13 +1,18 @@
-from django.utils.encoding import force_str
-from django.utils.http import urlsafe_base64_decode
+from django.utils.encoding import force_str, force_bytes
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.shortcuts import render
+from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth.models import User, Group
+from django.contrib.auth import login
 from datetime import datetime
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 from django.db.models import Sum, Count
 from .models import Product, Sale, Payment, Invite
 from khab.inviteTokens import invite_token_generator
+from django.core.mail import EmailMultiAlternatives
+
+
 #Index view, Main Boutique. Requires login.
 def index(request):
     products = Product.objects.all()
@@ -244,23 +249,6 @@ def createinvite(request):
     else:
         return HttpResponseRedirect('/')
 
-def register(request):
-    def get(self, request, uidb64, token):
-        try:
-            uid = force_text(urlsafe_base64_decode(uidb64))
-            invite = Invite.objects.get(pk=uid)
-        except (TypeError, ValueError, OverflowError, Invite.DoesNotExist):
-            invite = None
-
-        if invite is not None and invite_token.check_token(invite, token):
-            invite.profile.email_confirmed = True
-            user.save()
-            login(request, user)
-            return HttpResponseRedirect('/payments')
-        else:
-            # invalid link
-            return HttpResponseRedirect("/")
-
 def newinvite(request):
     if request.user.is_superuser:
         if request.method == "POST":
@@ -268,9 +256,91 @@ def newinvite(request):
             email = data.get("email")
             if email is not None and not User.objects.filter(email = email).exists():
                 Invite.objects.update_or_create(invited = email, defaults = {'timeout': datetime.now()})
+                invite = Invite.objects.get(invited = email)
+                currentSite = get_current_site(request)
+                siteName = currentSite.name
+                domain = currentSite.domain
+                context = {
+                    'email': email,
+                    'domain': domain,
+                    'siteName': siteName,
+                    'uid': urlsafe_base64_encode(force_bytes(invite.pk)),
+                    'token': invite_token_generator.make_token(invite),
+                    'protocol': 'http',
+                }
+                subject = "Skráning í KHA Boutique"
+                body = loader.render_to_string('registration/invite_email.html', context)
+                from_email = None
+                emailMessage = EmailMultiAlternatives(subject, body, from_email, [email])
+                emailMessage.send()
+                
         return HttpResponseRedirect('/users')
     else:
         return HttpResponseRedirect('/')
+
+INVITE_RESET_SESSION_TOKEN = "_invite_token"
+
+def register(request, **kwargs):
+    reset_url_token = "registration"
+    if "uidb64" in kwargs and "token" in kwargs:
+        validLink = False
+        invite = getinvite(kwargs["uidb64"])
+        if invite is not None:
+            token = kwargs["token"]
+            if token == reset_url_token:
+                session_token = request.session.get(INVITE_RESET_SESSION_TOKEN)
+                if invite_token_generator.check_token(invite, session_token):
+                    if request.method =="POST":
+                        data = request.POST
+                        username = data.get('username')
+                        pw1 = data.get('password1')
+                        pw2 = data.get('password2')
+                        fn = data.get('firstname')
+                        ln = data.get('lastname')
+                        if pw1 == pw2:
+                            user = User.objects.create_user(username = username, email = username, password = pw1, first_name = fn, last_name = ln)
+                            group = Group.objects.get(name='person')
+                            group.user_set.add(user)
+                            login(request, user)
+                            Invite.objects.filter(invited=username).delete()
+                            return HttpResponseRedirect('/')
+                        else:
+                            context = {
+                                'invite' : invite,
+                                'error' : "Lykilorðin sem þú settir inn eru ekki þau sömu"
+                            }
+                            template = loader.get_template('registration/register.html')
+                            return HttpResponse(template.render(context, request))
+
+                    else:
+                        # If the token is valid, display the password reset form.
+                        context = {'invite' : invite}
+                        template = loader.get_template('registration/register.html')
+                        return HttpResponse(template.render(context, request))
+                else:
+                    return HttpResponseRedirect('/noregister')
+            else:
+                if invite_token_generator.check_token(invite, token):
+                    # Store the token in the session and redirect to the
+                    # password reset form at a URL without the token. That
+                    # avoids the possibility of leaking the token in the
+                    # HTTP Referer header.
+                    request.session[INVITE_RESET_SESSION_TOKEN] = token
+                    redirect_url = request.path.replace(
+                        token, reset_url_token
+                    )
+                    return HttpResponseRedirect(redirect_url)
+                else:
+                    return HttpResponseRedirect('/noregister')
+        else:
+            return HttpResponseRedirect('/noregister')
+    else:
+        return HttpResponseRedirect('/')
+
+def noregister(request):
+    template = loader.get_template('registration/registration_broken_link.html')
+    context = {}
+    return HttpResponse(template.render(context, request))    
 
 ####################HELPER FUNCTIONS##################################
 def getdebt(user):
@@ -287,3 +357,17 @@ def getdebt(user):
             credit = credit.get('amount__sum')
         debt = credit-debit
         return debt
+
+def getinvite(uidb64):
+        try:
+            iid = urlsafe_base64_decode(uidb64).decode()
+            invite = Invite.objects.get(pk=iid)
+        except (
+            TypeError,
+            ValueError,
+            OverflowError,
+            InviteModel.DoesNotExist,
+            ValidationError,
+        ):
+            invite = None
+        return invite

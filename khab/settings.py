@@ -23,9 +23,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure--ou1+v@3a!2v(8(!vj@pgk66d!@sr-!l_ih2zc&y=y635#u-tg'
+SECRET_KEY_FALLBACKS = []
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+
+#Time an user invite stays valid
+INVITE_TIMEOUT = 86400
 
 ALLOWED_HOSTS = ["*"]
 

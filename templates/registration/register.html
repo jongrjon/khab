@@ -1,0 +1,48 @@
+{% extends 'boutique/base.html' %}  
+  
+{% block content %}
+    {% if messages %}  
+        <ul>   
+            {% for message in messages %}  
+                <li>{{ message }}</li>  
+                {% endfor %}  
+        </ul>   
+    {% endif %}   
+    <form method="post">
+        {% csrf_token %}
+        <div class="row justify-content-center">
+            <div class="col-lg-4 col-md-2 col-sm-1">
+                <h1>Nýskráning</h1> 
+                <div class="mb-3">
+                    <label for="username" class="form-label" >Notandanafn</label>
+                    <input type="text" class="form-control" id="username" name="username" {%if invite%}value="{{invite.invited}}" readonly {%endif%} required>
+                </div>
+                <div class="mb-3">
+                    <label for="firstname" class="form-label">Fyrra nafn</label>
+                    <input type="text" class="form-control" id="firstname" name="firstname" required>
+                </div>
+                <div class="mb-3">
+                    <label for="lastname" class="form-label">Eftirnafn</label>
+                    <input type="text" class="form-control" id="lastname" name="lastname" required>
+                </div>
+                <div class="mb-3">
+                    <label for="password1" class="form-label">Lykilorð</label>
+                    <input type="password" class="form-control" id="password1" name="password1" required>
+                </div>
+                <div class="mb-3">
+                    <label for="password2" class="form-label">Nýtt lykilorð endurtekið</label>
+                    <input type="password" class="form-control" id="password2" name="password2" required>
+                </div>
+                <div class="mb-3 text-end">
+                    <button class="btn btn-success" type="submit">Skrá notanda</button>
+                </div>
+                {%if error%}
+                <div class="alert alert-danger" role="alert">
+                    <h4>{{error}}</h4>
+                </div>
+                {%endif%}
+            </div>
+        </div>
+    </form>
+  
+{% endblock content %}  
