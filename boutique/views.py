@@ -70,6 +70,18 @@ def users(request, id = None):
     #Checks if logged in account is indeed marked as a person.
     if request.user.is_superuser or (request.user.groups.filter(name="person").exists() and request.user.id == id):
         if id is None and request.user.is_superuser:
+            if request.method == "POST":
+                print("I get here")
+                data = request.POST
+                uid = data.get('userid')
+                changinguser = User.objects.get(id=uid)
+                print(changinguser)
+                if changinguser.is_active is True:
+                    changinguser.is_active = False
+                    changinguser.save()
+                else:
+                    changinguser.is_active = True
+                    changinguser.save()
             template = loader.get_template('boutique/users.html')
             invites = Invite.objects.all().order_by('invited')
             modelusers = User.objects.filter(groups__name__in=['person','vendor'])
@@ -79,7 +91,8 @@ def users(request, id = None):
                     'id':muser.id,
                     'first_name' : muser.first_name,
                     'last_name' : muser.last_name,
-                    'debt' : getdebt(muser)
+                    'debt' : getdebt(muser),
+                    'is_active' : muser.is_active
                 }
                 users.append(user)
             context = {

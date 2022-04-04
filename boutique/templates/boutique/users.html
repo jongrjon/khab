@@ -26,7 +26,15 @@
 				<div class ="fw-bold"><a href="users/{{user.id}}" class="userlink" >{{user.first_name}} {{user.last_name}}</a></div>
 				<span class="badge {%if user.debt >= 0 %}bg-success{%else%}bg-danger{%endif%}">{{user.debt}}</span>
 			</div>
-			<button class="newpayment btn btn-success" onClick="newPayment(event,'{{user.first_name}}','{{user.last_name}}',{{user.id}},{{user.debt}})">Skrá innborgun</button>
+                        <div class="form-check form-switch align-self-center form-floating me-3">
+                                <form method="post">
+                                {% csrf_token %}
+                                        <input name="userid" value="{{user.id}}" hidden>
+                                        <label class="form-check-label" for="isactive">{%if user.is_active%}Virkur{%else%}Óvirkur{%endif%}</label>
+                                        <input class="form-check-input form-control" type="checkbox" id="isactive" name="isactive" onchange="changeStatus(event,this)" value={%if user.is_active%}"True" checked{%else%}"False"{%endif%}>
+                                </form>
+                        </div>
+			<button class="newpayment btn btn-success align-self-center" onClick="newPayment(event,'{{user.first_name}}','{{user.last_name}}',{{user.id}},{{user.debt}})">Skrá innborgun</button>
 		</li>
 	{% endfor %}
 	</ul>

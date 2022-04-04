@@ -24,3 +24,12 @@ header{
 .userlink:hover{
 	color:#a52417;
 }
+
+.form-check-input{
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+.form-check-input:checked{
+    background-color: #198754;
+    border-color: #198754;
+}
