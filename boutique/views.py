@@ -93,11 +93,16 @@ def users(request, id = None):
             payment = Payment.objects.filter(payer = user)
             debt = getdebt(user)
             template = loader.get_template('boutique/status.html')
+            password = False
+            if request.user.id == user.id:
+                password = True
+            print(password)
             context = {
                 'user' : user,
                 'purchase' :purchase,
                 'debt' : debt,
                 'payment': payment,
+                'password': password
             }
             return HttpResponse(template.render(context,request))
     else:
@@ -303,7 +308,7 @@ def register(request, **kwargs):
                             group.user_set.add(user)
                             login(request, user)
                             Invite.objects.filter(invited=username).delete()
-                            return HttpResponseRedirect('/')
+                            return HttpResponseRedirect('/users/' +str(user.id))
                         else:
                             context = {
                                 'invite' : invite,
@@ -366,8 +371,7 @@ def getinvite(uidb64):
             TypeError,
             ValueError,
             OverflowError,
-            InviteModel.DoesNotExist,
-            ValidationError,
+            Invite.DoesNotExist,
         ):
             invite = None
         return invite
