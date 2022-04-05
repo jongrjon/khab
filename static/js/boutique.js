@@ -35,7 +35,7 @@ function newPayment(e, fn, ln, uid,amnt){
 	}
 	$("#payerid").val(uid);
 	$("#userpaymentpopup").modal("show");
-}
+};
 
 function editPayment(e, fn, ln, pid, amnt){
 	e.preventDefault();
@@ -44,7 +44,7 @@ function editPayment(e, fn, ln, pid, amnt){
 	$("#paymentid").val(pid);
 	$("#deletepaymentid").val(pid)
 	$("#editpaymentpopup").modal("show");
-}
+};
 
 //event,'{{sale.buyer.first_name}}','{{sale.buyer.last_name}}',{{sale.id}},{{sale.price}},'{{sale.product.name|default_if_none:'Vara hætt'}}')
 function editSale(e, fn, ln, sid, amnt, pn){
@@ -55,11 +55,16 @@ function editSale(e, fn, ln, sid, amnt, pn){
 	$("#saleid").val(sid);
 	$("#deletesaleid").val(sid)
 	$("#editsalepopup").modal("show");
-}
+};
 
 function newInvite(e){
 	e.preventDefault();
 	$("#invitepopup").modal("show");
+};
+
+function changeStatus(e,t){
+	e.preventDefault();
+    $(t).closest("form").submit();
 };
 
 $(document).ready(purchasedItem);
