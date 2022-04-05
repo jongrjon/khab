@@ -71,11 +71,9 @@ def users(request, id = None):
     if request.user.is_superuser or (request.user.groups.filter(name="person").exists() and request.user.id == id):
         if id is None and request.user.is_superuser:
             if request.method == "POST":
-                print("I get here")
                 data = request.POST
                 uid = data.get('userid')
                 changinguser = User.objects.get(id=uid)
-                print(changinguser)
                 if changinguser.is_active is True:
                     changinguser.is_active = False
                     changinguser.save()
@@ -109,7 +107,11 @@ def users(request, id = None):
             password = False
             if request.user.id == user.id:
                 password = True
-            print(password)
+            if request.method == "POST":
+                data = request.POST
+                user.first_name = data.get('fn')
+                user.last_name = data.get('ln')
+                user.save()
             context = {
                 'user' : user,
                 'purchase' :purchase,

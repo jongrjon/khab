@@ -64,7 +64,15 @@ function newInvite(e){
 
 function changeStatus(e,t){
 	e.preventDefault();
-    $(t).closest("form").submit();
+	$(t).closest("form").submit();
 };
+
+function changeUser(e, id, fn, ln){
+	e.preventDefault();
+        $("#editfn").val(fn);
+        $("#editln").val(ln)
+        $("#userid").val(id);
+        $("#edituserpopup").modal("show");
+}
 
 $(document).ready(purchasedItem);

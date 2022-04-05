@@ -6,11 +6,12 @@
 		<div class="row">
 			<div class="col">
 				<h1>{{user.first_name}} {{user.last_name}}</h1>
-				 <button class="btn btn-primary btn-sm" onClick="ChangeUser(event,user.id,user.first_name,user.last_name)" >Breyta upplýsingum</button>
+				<button class="btn btn-primary btn-sm" onClick="changeUser(event,{{user.id}},'{{user.first_name}}','{{user.last_name}}')" >Breyta upplýsingum</button>
 				 {%if password == True%}<button class="btn btn-warning btn-sm" onClick="ChangePassword(event)">Breyta lykilorði</buttin>{%endif%}
 			</div>
 			<div class="col text-end">
-				<h4>Viðskiptastaða <span class="badge bg-{%if debt < 0%}danger{%else%}success{%endif%}">{{debt}} kr</span></h4>
+				<h4>Viðskiptastaða</h4>
+				<h4><span class="badge bg-{%if debt < 0%}danger{%else%}success{%endif%}">{{debt}} kr</span></h4>
 			</div>
 		</div>
 		<div class="row">
@@ -67,12 +68,11 @@
                                                 <input type="text" id="editfn" name="fn" value= "" aria-label="Fyrra nafn" class="form-control" required>
                                         </div>
 					<div class="input-group mb-3">
-                                                <input type="text" id="editfn" name="fn" value= "" aria-label="Fyrra nafn" class="form-control" required>
+                                                <input type="text" id="editln" name="ln" value= "" aria-label="Fyrra nafn" class="form-control" required>
                                         </div>
 
                                         <div class="modal-footer">
-                                                <input type="hidden" id="previous_page" name="previous_page" value="/payments">
-                                                <button type="submit" id="paymentid" class="btn btn-success" name="paymentid" value="">Breyta innborgun</button>
+                                                <button type="submit" id="userid" class="btn btn-success" name="userid" value="">Breyta notanda</button>
                                                 <button type="button" class="btn btn-warning" name="dismiss" data-bs-dismiss="modal">Hætta við</button>
                                         </form>
                                 </div>
