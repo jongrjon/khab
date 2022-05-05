@@ -12,9 +12,9 @@
 			<div class="card">
         			<img src = "media/{{ product.prod_img }}" class="card-img-top thumbnail">
 				<div class ="card-body">
-					<h3 class="card-title">{{product.name}}</h3> 
+					<h4 class="card-title">{{product.name}}</h4> 
 					<div class="d-grid gap-2">
-						<h4>{{product.price}} kr.</h4> 
+						<h5>{{product.price}} kr.</h5> 
 						<button class="newproduct btn btn-danger btn-block" data-url="{% url 'newproduct' pnr=product.id %}"  name="change" value={{product.id}} onclick="editProduct(event, this)">Breyta</button>
 					</div>
 				</div>

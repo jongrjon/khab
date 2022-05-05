@@ -15,9 +15,9 @@ from django.core.mail import EmailMultiAlternatives
 
 #Index view, Main Boutique. Requires login.
 def index(request):
-    products = Product.objects.all()
+    products = Product.objects.annotate(salenum = Count('sale', distinct = True)).order_by("-salenum")
     template = loader.get_template('boutique/index.html')
-    users = User.objects.filter(groups__name='person')
+    users = User.objects.filter(groups__name='person').order_by("first_name")
     response ={}
     #Checks if signed in user is a personal account before preparing appropriate objects
     if request.user.groups.filter(name="person").exists():
@@ -38,7 +38,6 @@ def index(request):
     #Checks if non personal account is a vending display account.
     #Prepares sales menu with a list of registered buyers.
     if request.user.groups.filter(name="vendor").exists():
-        print("I get here")
         if request.method == "POST":       
             data = request.POST
             pid = data.get("purchase")
@@ -128,7 +127,7 @@ def sales(request):
     if request.user.is_superuser:
         template = loader.get_template('boutique/sales.html')
         sales = Sale.objects.all().order_by('-saletime')
-        products = Product.objects.annotate(salenum = Count('sale', distinct = True))
+        products = Product.objects.annotate(salenum = Count('sale', distinct = True)).order_by("-salenum")
         context = {
             'sales' : sales,
             'products' : products,
@@ -160,7 +159,7 @@ def deletesale(request):
 def products(request):
     if request.user.is_superuser:
         template = loader.get_template('boutique/products.html')
-        products = products = Product.objects.all()
+        products = Product.objects.annotate(salenum = Count('sale', distinct = True)).order_by("-salenum")
         context = {
         'products' :products,
         }
@@ -325,8 +324,13 @@ def register(request, **kwargs):
                             Invite.objects.filter(invited=username).delete()
                             return HttpResponseRedirect('/users/' +str(user.id))
                         else:
+                            previous ={
+                                    'fn' : fn,
+                                    'ln': ln
+                            }
                             context = {
                                 'invite' : invite,
+                                'previous': previous,
                                 'error' : "Lykilorðin sem þú settir inn eru ekki þau sömu"
                             }
                             template = loader.get_template('registration/register.html')

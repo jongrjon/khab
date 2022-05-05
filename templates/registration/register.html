@@ -19,18 +19,18 @@
                 </div>
                 <div class="mb-3">
                     <label for="firstname" class="form-label">Fyrra nafn</label>
-                    <input type="text" class="form-control" id="firstname" name="firstname" required>
+		    <input type="text" class="form-control" id="firstname" name="firstname" {%if previous%}value="{{previous.fn}}"{%endif%}required>
                 </div>
                 <div class="mb-3">
                     <label for="lastname" class="form-label">Eftirnafn</label>
-                    <input type="text" class="form-control" id="lastname" name="lastname" required>
+                    <input type="text" class="form-control" id="lastname" name="lastname" {%if previous%}value="{{previous.ln}}"{%endif%} required>
                 </div>
                 <div class="mb-3">
                     <label for="password1" class="form-label">Lykilorð</label>
                     <input type="password" class="form-control" id="password1" name="password1" required>
                 </div>
                 <div class="mb-3">
-                    <label for="password2" class="form-label">Nýtt lykilorð endurtekið</label>
+                    <label for="password2" class="form-label">Lykykilorð endurtekið</label>
                     <input type="password" class="form-control" id="password2" name="password2" required>
                 </div>
                 <div class="mb-3 text-end">

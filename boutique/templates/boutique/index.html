@@ -6,7 +6,7 @@
 {% csrf_token %}
 {%if users%}
 	<div class="d-flex p-2 bd-highlight"> 
-		<select class="form-select" name="buyer" required oninvalid="this.setCustomValidity('Veldu nafnið þitt')" oninput="setCustomValidity('')" >
+		<select class="form-select form-select-lg mb-3" name="buyer" required oninvalid="this.setCustomValidity('Veldu nafnið þitt')" oninput="setCustomValidity('')" >
 			<option value="" disabled selected hidden> Veldu starfsmann</option>
 			{%for user in users%}
 			<option value="{{user.id}}" name="user">{{user.first_name}} {{user.last_name}}</option>
@@ -38,9 +38,9 @@
 			<div class="card">
 				<img src="media/{{ product.prod_img }}" class="card-img-top thumbnail">
 				<div class="card-body">
-					<h3 class="card-title">{{product.name}}</h3>
+					<h4 class="card-title">{{product.name}}</h4>
 					<div class="d-grid gap-2">
-						<h4>{{product.price}} kr.</h4>
+						<h5>{{product.price}} kr.</h5>
 						<button class="btn btn-danger btn-block" name="purchase" value="{{product.id}}">Kaupa</button>
 					</div>
 				</div>

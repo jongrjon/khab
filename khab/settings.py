@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 from pathlib import Path
 from django.conf import settings
 import os
+from .emailsettings import *
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,7 +27,7 @@ SECRET_KEY = 'django-insecure--ou1+v@3a!2v(8(!vj@pgk66d!@sr-!l_ih2zc&y=y635#u-tg
 SECRET_KEY_FALLBACKS = []
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 #Time an user invite stays valid
 INVITE_TIMEOUT = 86400
@@ -77,9 +78,14 @@ TEMPLATES = [
 WSGI_APPLICATION = 'khab.wsgi.application'
 
 ##Email settings
-EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
-EMAIL_FILE_PATH = BASE_DIR / "sent_emails"
-
+#EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
+#EMAIL_FILE_PATH = BASE_DIR / "sent_emails"
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = EMAIL_USER
+EMAIL_HOST_PASSWORD = EMAIL_PW
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
