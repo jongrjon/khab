@@ -155,4 +155,4 @@ cython_debug/
 .secret.env
 
 #email settings
-*.emailsettings.py
+*/emailsettings.py

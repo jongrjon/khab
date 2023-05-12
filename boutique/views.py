@@ -1,5 +1,6 @@
 from django.utils.encoding import force_str, force_bytes
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django.utils.timezone import make_aware
 from django.shortcuts import render
 from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth.models import User, Group
@@ -81,7 +82,7 @@ def users(request, id = None):
                     changinguser.save()
             template = loader.get_template('boutique/users.html')
             invites = Invite.objects.all().order_by('invited')
-            modelusers = User.objects.filter(groups__name__in=['person','vendor'])
+            modelusers = User.objects.filter(groups__name__in=['person','vendor']).order_by('first_name')
             users = []
             for muser in modelusers:
                 user = {
@@ -99,8 +100,8 @@ def users(request, id = None):
             return HttpResponse(template.render(context, request))
         else:
             user = User.objects.get(id =id)
-            purchase = Sale.objects.filter(buyer = user)
-            payment = Payment.objects.filter(payer = user)
+            purchase = Sale.objects.filter(buyer = user).order_by('-saletime')
+            payment = Payment.objects.filter(payer = user).order_by('-paytime')
             debt = getdebt(user)
             template = loader.get_template('boutique/status.html')
             password = False
