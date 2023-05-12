@@ -1,0 +1,52 @@
+{%extends "boutique/base.html"%}
+{%block title%}KHAB - Users{%endblock%}
+{%block header%}User administration{%endblock%}
+{%block content%}
+<div class="container">
+    
+    <form method="get" class="row row-cols-lg-auto g-3 align-items-center">
+        <div class="col">
+            <label for="start_date">Frá</label>
+        </div>
+        <div class="col">
+          <div class="input-group">
+            <input type="date" class="form-control" id="start_date" name="start_date" value="{{ request.GET.start_date }}">
+          </div>
+        </div>
+        <div class="col">
+            <label for="start_date">Til</label>
+        </div>
+        <div class="col">
+            <div class="input-group">
+              <input type="date" class="form-control" id="end_date" name="end_date" value="{{ request.GET.end_date }}">
+            </div>
+          </div>
+      
+        <div class="col-12">
+          <button type="submit" class="btn btn-primary">Sía</button>
+        </div>
+    </form>
+
+{%if users%}
+	{%for user in users%}
+        <div class="row align-items-center">
+                <div class="col-3 align-middle">
+                        <h6>{{user.name}}</h6>
+                </div>
+                <div class="col align-middle">
+                    {%if user.name == current%}
+                        <div class="progress">
+                            <div class="progress-bar bg-danger" role="progressbar" style="width: {{user.sales}}%" aria-valuenow="{{user.sales}}" aria-valuemin="0" aria-valuemax="100">{{user.sales}}%</div>
+                        </div>
+                    {%else%}
+                        <div class="progress">
+                            <div class="progress-bar" role="progressbar" style="width: {{user.sales}}%" aria-valuenow="{{user.sales}}" aria-valuemin="0" aria-valuemax="100">{{user.sales}}%</div>
+                        </div>
+                    {%endif%}
+                </div>
+        </div>
+    
+	{% endfor %}
+{% endif %}
+</div>
+{%endblock%}

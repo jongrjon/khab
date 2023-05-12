@@ -27,11 +27,12 @@
 					<ul class="navbar-nav me-auto mb-2 mb-lg-0">
 						{%if request.user.is_superuser%}
 						<li class="nav-item"><a class="nav-link{% if '/users' in request.path %} active"  aria-current="page" {% endif %}" href="/users">Notendur</a></li>
-						<li class="nav-item"><a class="nav-link{% if request.path == '/payments' %} active" aria-current="page" {% endif %}"  href="/payments">Innborganir</a></li>
-						<li class="nav-item"><a class="nav-link{% if request.path == '/sales' %} active" aria-current="page" {% endif %}" href="/sales">Sölur</a></li>
+						<li class="nav-item"><a class="nav-link{% if request.path == '/payments' %} active" aria-current="page" {% endif %}"  href="/payments">Innborganir</a></li>	
 						{%else%}
 						<li class="nav-item"><a class="nav-link {% if '/users' in request.path %} active" aria-current="page" {% endif %}"  href="/users/{{request.user.id}}">{{request.user.first_name}} {{request.user.last_name}}</a></li>
-						{%endif%}	
+						{%endif%}
+						<li class="nav-item"><a class="nav-link{% if request.path == '/sales' %} active" aria-current="page" {% endif %}" href="/sales">Sölur</a></li>
+						<li class="nav-item"><a class="nav-link {% if '/users' in request.path %} active" aria-current="page" {% endif %}"  href="/scoreboard">Stöðutafla</a></li>	
 					</ul>
 					<a class="btn btn-outline-light my-2 my-sm-0" type="button" href="/logout">Útskrá</a> 
 				</div>

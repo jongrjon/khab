@@ -67,6 +67,21 @@ function changeStatus(e,t){
 	$(t).closest("form").submit();
 };
 
+function productStatus(e,t){
+	e.preventDefault();
+	val = $("#productactive").val();
+	console.log(val);
+	if(val == "True"){
+		$("#productactivelabel").text("Óvirk");
+		$("#productactive").val("False")
+	}
+	else{
+		$("#productactivelabel").text("Virk");
+		$("#productactive").val("True")
+	}
+
+};
+
 function changeUser(e, id, fn, ln){
 	e.preventDefault();
         $("#editfn").val(fn);

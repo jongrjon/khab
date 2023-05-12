@@ -29,23 +29,30 @@
 						</div>
 					</div>
 					<form id="newproduct" method="post" enctype="multipart/form-data">
-					{%csrf_token%}
-					<div class="input-group mb-3">
-						<input type="text" id="productname" name="productname" {%if product%} value= "{{product.name}}"{%else%}placeholder= "Nafn vöru" {%endif%} aria-label="Nafn vöru" class="form-control" required>
-					</div>
-					<div class ="inpup-group mb-3">
-						<label for="productimage" class="form-label">Mynd af vöru</label>
-						{%if product%}<img src = "media/{{product.prod_img}}" class="thumbnail editpreview"> {%endif%}
-						<input type="file" id="productimage" placeholder="Mynd af vöru" aria-label="Mynd af vöru" name="productimage" class="form-control" {%if not product%}required {%endif%} >
-					</div>
-					<div class="input-group mb-3">
-						<input type="number" placeholder="Verð" aria-label="Verð" name="productprice" {%if product%}value={{product.price}}{%endif%} class="form-control" required >
-						<span class="input-group-text">Kr.</span>
-					</div>
-
-      					<div class="modal-footer">
-						<button type="submit" class="btn btn-success" {%if product%}name="productid" value="{{product.id}}"{%endif%}>Vista</button>
-						<button type="button" class="btn btn-warning" name="dismiss" data-bs-dismiss="modal">Hætta við</button>
+						{%csrf_token%}
+						<div class="input-group mb-3">
+							<input type="text" id="productname" name="productname" {%if product%} value= "{{product.name}}"{%else%}placeholder= "Nafn vöru" {%endif%} aria-label="Nafn vöru" class="form-control" required>
+						</div>
+						<div class ="input-group mb-3">
+							<label for="productimage" class="form-label">Mynd af vöru</label>
+							{%if product%}<img src = "media/{{product.prod_img}}" class="thumbnail editpreview"> {%endif%}
+							<input type="file" id="productimage" placeholder="Mynd af vöru" aria-label="Mynd af vöru" name="productimage" class="form-control" {%if not product%}required {%endif%} >
+						</div>
+						<div class="input-group mb-3">
+							<input type="number" placeholder="Verð" aria-label="Verð" name="productprice" {%if product%}value={{product.price}}{%endif%} class="form-control" required >
+							<span class="input-group-text">Kr.</span>
+						</div>
+						<input class="form-check-input form-control" type="checkbox" id="banani" name="banani" value =""}>
+						<div class="modal-footer justify-content-between">
+							<div class="col">
+								<div class="form-check form-switch">
+									<label class="form-check-label" for="productactive" id="productactivelabel">{%if product.active%}Virk{%else%}Óvirk{%endif%}</label>
+									<input class="form-check-input form-control" type="checkbox" id="productactive" name="productactive" onchange="productStatus(event,this)" value={%if product.active == False %}"False" {%else%}"True" checked{%endif%}>
+								</div>
+							</div>
+							<button type="submit" class="btn btn-success" {%if product%}name="productid" value="{{product.id}}"{%endif%}>Vista</button>
+							<button type="button" class="btn btn-warning" name="dismiss" data-bs-dismiss="modal">Hætta við</button>
+						</div>
 					</form>
       				</div>
     			</div>

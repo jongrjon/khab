@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure--ou1+v@3a!2v(8(!vj@pgk66d!@sr-!l_ih2zc&y=y635#u-tg
 SECRET_KEY_FALLBACKS = []
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 #Time an user invite stays valid
 INVITE_TIMEOUT = 86400
@@ -131,13 +131,12 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
-
 STATIC_URL = 'static/'
 MEDIA_ROOT =  BASE_DIR /'media'
 MEDIA_URL = '/media/'
-STATICFILES_DIRS = (
-  os.path.join(BASE_DIR, 'static/'),
-)
+STATICFILES_DIRS = [
+  os.path.join(BASE_DIR, 'static'),
+]
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 

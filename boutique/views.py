@@ -4,20 +4,20 @@ from django.shortcuts import render
 from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth.models import User, Group
 from django.contrib.auth import login
-from datetime import datetime
+from datetime import datetime, date, time
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
-from django.db.models import Sum, Count
+from django.db.models import Sum, Count, Q
 from .models import Product, Sale, Payment, Invite
 from khab.inviteTokens import invite_token_generator
 from django.core.mail import EmailMultiAlternatives
-
+import csv
 
 #Index view, Main Boutique. Requires login.
 def index(request):
-    products = Product.objects.annotate(salenum = Count('sale', distinct = True)).order_by("-salenum")
+    products = Product.objects.filter(active=True).annotate(salenum = Count('sale', distinct = True)).order_by("-salenum")
     template = loader.get_template('boutique/index.html')
-    users = User.objects.filter(groups__name='person').order_by("first_name")
+    users = User.objects.filter(groups__name='person').filter(is_active=True).order_by("first_name")
     response ={}
     #Checks if signed in user is a personal account before preparing appropriate objects
     if request.user.groups.filter(name="person").exists():
@@ -124,17 +124,34 @@ def users(request, id = None):
 
 #Admin view for managing sales, showing every unique sale as well as sales numbers for products
 def sales(request):
-    if request.user.is_superuser:
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
+    # Convert the start and end dates to datetime objects
+    if start_date and start_date != '':
+        start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+    else:
+        start_date = datetime.min.date()
+
+    if end_date and end_date != '':
+        end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+        # Set the end date to the end of the day
+        end_date = datetime.combine(end_date, time.max).replace(tzinfo=None)
+    else:
+        end_date = datetime(year=9999, month=12, day=31, hour=0, minute=0, second=0)
         template = loader.get_template('boutique/sales.html')
-        sales = Sale.objects.all().order_by('-saletime')
-        products = Product.objects.annotate(salenum = Count('sale', distinct = True)).order_by("-salenum")
+    products = Product.objects.annotate(salenum = Count('sale', filter=Q(sale__saletime__gte=start_date, sale__saletime__lte=end_date), distinct = True)).order_by("-salenum")
+    if request.user.is_superuser:
+        sales = Sale.objects.filter(saletime__gte=start_date, saletime__lte=end_date).order_by('-saletime')
         context = {
             'sales' : sales,
             'products' : products,
         }
-        return HttpResponse(template.render(context, request))
     else:
-        return HttpResponseRedirect('/')
+        context = {
+            'products' : products,
+        }
+    return HttpResponse(template.render(context, request))
 
 def editsale(request):
     if request.user.is_superuser:
@@ -168,11 +185,15 @@ def products(request):
             pid = data.get("productid")
             img = request.FILES.get("productimage")
             pname = data.get("productname")
+            if data.get("productactive") is None:
+                pactive = False
+            else:
+                pactive = True
             if img is None:
                 tempprod = Product.objects.get(id = pid)
                 img = tempprod.prod_img
             pprice = data.get("productprice")
-            Product.objects.update_or_create(id = pid, defaults = {'name' : pname,'prod_img' : img, 'price' : pprice})
+            Product.objects.update_or_create(id = pid, defaults = {'name' : pname,'prod_img' : img, 'price' : pprice, 'active' : pactive})
         return HttpResponse(template.render(context,request))
     else:
         return HttpResponseRedirect('/')
@@ -257,6 +278,55 @@ def deletepayment(request):
             return HttpResponseRedirect('/payments')
     else:
         return HttpResponseRedirect('/')
+
+def scoreboard(request):
+    template =loader.get_template('boutique/scoreboard.html')
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
+    # Convert the start and end dates to datetime objects
+    if start_date and start_date != '':
+        start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+    else:
+        start_date = datetime.min.date()
+
+    if end_date and end_date != '':
+        end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+        # Set the end date to the end of the day
+        end_date = datetime.combine(end_date, time.max).replace(tzinfo=None)
+    else:
+        end_date = datetime(year=9999, month=12, day=31, hour=0, minute=0, second=0)
+    
+    modelusers = User.objects.filter(groups__name__in = ['person']).filter(is_active=True)
+    users = []
+    biggest = 0.0
+    for muser in modelusers:
+        name = ""
+        bought = gettotalexpenses(muser,start_date,end_date)
+        if bought > biggest:
+            biggest = bought
+        if muser == request.user or request.user.is_superuser:
+            name = muser.first_name +" "+ muser.last_name
+        else:
+            name = "**********"
+        user = {
+            'name' : name,
+            'sales' : float(bought),
+        }
+        users.append(user)
+
+    for user in users:
+        if biggest > 0:
+            user['sales'] = int(round(user['sales']/biggest*100,0))
+        else:
+            user['sales'] = 0
+
+    users.sort(key=getprogress, reverse = True)
+    context = {
+        'users' : users,
+        'current': request.user.first_name + " " + request.user.last_name,
+        }
+    return HttpResponse(template.render(context, request))
 
 def createinvite(request):
     if request.user.is_superuser:
@@ -364,23 +434,68 @@ def register(request, **kwargs):
 def noregister(request):
     template = loader.get_template('registration/registration_broken_link.html')
     context = {}
-    return HttpResponse(template.render(context, request))    
+    return HttpResponse(template.render(context, request))
+
+def debtcsv(request):
+    if request.user.is_superuser:
+        response = HttpResponse(
+            content_type='text/csv',
+            headers={'Content-Disposition': 'attachment; filename="debt.csv"'},
+        )
+        response.write(u'\ufeff'.encode('utf8'))
+        modelusers = User.objects.filter(groups__name__in = ['person']).order_by('first_name')
+        users = []
+        for muser in modelusers:
+            user = {
+                'id':muser.id,
+                'first_name' : muser.first_name,
+                'last_name' : muser.last_name,
+                'debt' : getdebt(muser)
+            }
+            users.append(user)
+        writer = csv.writer(response)
+        for user in users:
+            writer.writerow([str(user['first_name']+" "+user['last_name']), user['debt']])
+        return response
+    else:
+        return HttpResponseRedirect('/')
+    
+def paymentscsv(request):
+    if request.user.is_superuser:
+        response = HttpResponse(
+            content_type='text/csv',
+            headers={'Content-Disposition': 'attachment; filename="payments.csv"'},
+        )
+        response.write(u'\ufeff'.encode('utf8'))
+        payments = Payment.objects.all().order_by('-paytime')
+        writer = csv.writer(response)
+        for p in payments:
+            print(p.paytime)
+            writer.writerow([p.paytime.strftime("%d/%m/%Y, %H:%M"), str(p.payer.first_name+" "+p.payer.last_name), p.amount])
+        return response
+    else:
+        return HttpResponseRedirect('/')   
 
 ####################HELPER FUNCTIONS##################################
-def getdebt(user):
-        purchase = Sale.objects.filter(buyer = user)
-        debit = Sale.objects.filter(buyer = user).aggregate(Sum('price'))
-        if debit.get('price__sum') is None:
-            debit = 0
-        else:
-            debit = debit.get('price__sum')
-        credit = Payment.objects.filter(payer = user).aggregate(Sum('amount'))
-        if credit.get('amount__sum') is None:
+def gettotalexpenses(user, startdate=datetime.min.date(), enddate=datetime.max.date()):
+        credit = Sale.objects.filter(buyer = user).filter(saletime__gte=startdate, saletime__lte=enddate).aggregate(Sum('price'))
+        if credit.get('price__sum') is None:
             credit = 0
         else:
-            credit = credit.get('amount__sum')
-        debt = credit-debit
+            credit = credit.get('price__sum')
+        return credit
+
+def getdebt(user):
+        debit = Payment.objects.filter(payer = user).aggregate(Sum('amount'))
+        if debit.get('amount__sum') is None:
+            debit = 0
+        else:
+            debit = debit.get('amount__sum')
+        debt = gettotalexpenses(user)-debit
         return debt
+
+def getprogress(element):
+    return element['sales']
 
 def getinvite(uidb64):
         try:

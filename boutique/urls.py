@@ -20,4 +20,7 @@ urlpatterns = [
     path('newinvite',views.newinvite, name='newinvite'),
     path('register/<uidb64>/<token>/', views.register, name='register'),
     path('noregister', views.noregister, name='noregister'),
+    path('paymentscsv', views.paymentscsv, name='paymentscsv'),
+    path('debtcsv', views.debtcsv, name='debtcsv'),
+    path('scoreboard', views.scoreboard, name='scoreboard'),
 ]

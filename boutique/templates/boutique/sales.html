@@ -3,6 +3,28 @@
 {%block header%}User administration{%endblock%}
 {%block content%}
         <div class="container">
+                <form method="get" class="row row-cols-lg-auto g-3 align-items-center">
+                        <div class="col">
+                            <label for="start_date">Frá</label>
+                        </div>
+                        <div class="col">
+                          <div class="input-group">
+                            <input type="date" class="form-control" id="start_date" name="start_date" value="{{ request.GET.start_date }}">
+                          </div>
+                        </div>
+                        <div class="col">
+                            <label for="start_date">Til</label>
+                        </div>
+                        <div class="col">
+                            <div class="input-group">
+                              <input type="date" class="form-control" id="end_date" name="end_date" value="{{ request.GET.end_date }}">
+                            </div>
+                          </div>
+                      
+                        <div class="col-12">
+                          <button type="submit" class="btn btn-primary">Sía</button>
+                        </div>
+                    </form>
                 <div class="row">
                         <div class="col">
                                 <h4>Sölutölur</h4>
@@ -23,6 +45,7 @@
                                         </tbody>
                                 </table>
                         </div>
+                        {%if sales%}
                         <div class="col">
                                 <h4>Söluyfirlit</h4>
                                  <table class="table table-light table-striped table-sm ">
@@ -46,8 +69,10 @@
                                         </tbody>
                                 </table>
                         </div>
+                        {%endif%}
                 </div>
         </div>
+        {%if sales%}
         <div id="editsalepopup" class="modal fade" role="dialog">
                 <div class="modal-dialog modal-lg">
                         <div class="modal-content">
@@ -81,5 +106,6 @@
                         </div>
                 </div>
         </div>
+        {%endif%}
 {%endblock%}
 
