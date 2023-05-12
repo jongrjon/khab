@@ -5,6 +5,7 @@ class Product(models.Model):
 	name = models.CharField(max_length=50)
 	prod_img = models.ImageField(upload_to='images/products/')
 	price = models.IntegerField()
+	active = models.BooleanField(default=True)
 
 	def __str__(self):
 		return self.name
