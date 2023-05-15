@@ -140,8 +140,8 @@ def sales(request):
         end_date = datetime.combine(end_date, time.max).replace(tzinfo=None)
     else:
         end_date = datetime(year=9999, month=12, day=31, hour=0, minute=0, second=0)
-        template = loader.get_template('boutique/sales.html')
     products = Product.objects.annotate(salenum = Count('sale', filter=Q(sale__saletime__gte=start_date, sale__saletime__lte=end_date), distinct = True)).order_by("-salenum")
+    template = loader.get_template('boutique/sales.html')
     if request.user.is_superuser:
         sales = Sale.objects.filter(saletime__gte=start_date, saletime__lte=end_date).order_by('-saletime')
         context = {
@@ -492,7 +492,7 @@ def getdebt(user):
             debit = 0
         else:
             debit = debit.get('amount__sum')
-        debt = gettotalexpenses(user)-debit
+        debt = debit-gettotalexpenses(user)
         return debt
 
 def getprogress(element):
