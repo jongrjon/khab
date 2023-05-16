@@ -3,7 +3,7 @@
 {%block header%}User administration{%endblock%}
 {%block content%}
         <div class="container">
-                <form method="get" class="row row-cols-lg-auto g-3 align-items-center">
+                <form method="get" id="salesfilter" class="row row-cols-lg-auto g-3 align-items-center">
                         <div class="col">
                             <label for="start_date">Frá</label>
                         </div>
@@ -24,7 +24,13 @@
                         <div class="col-12">
                           <button type="submit" class="btn btn-primary">Sía</button>
                         </div>
-                    </form>
+                        {%if request.user.is_superuser%}
+                        <div class="col-12">
+                                <button type="button" class="btn btn-primary" onclick="filterSalesCSV()">Sækja csv</button>
+                        </div>
+                        {%endif%}
+                </form>
+                
                 <div class="row">
                         <div class="col">
                                 <h4>Sölutölur</h4>

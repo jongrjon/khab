@@ -475,6 +475,37 @@ def paymentscsv(request):
             writer.writerow([p.paytime.strftime("%d/%m/%Y, %H:%M"), str(p.payer.first_name+" "+p.payer.last_name), p.amount])
         return response
     else:
+        return HttpResponseRedirect('/')
+
+def salescsv(request):
+    if request.user.is_superuser:
+        response = HttpResponse(
+            content_type='text/csv',
+            headers={'Content-Disposition': 'attachment; filename="sales.csv"'},
+        )
+        start_date = request.GET.get('start_date')
+        end_date = request.GET.get('end_date')
+
+        # Convert the start and end dates to datetime objects
+        if start_date and start_date != '':
+            start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+        else:
+            start_date = datetime.min.date()
+
+        if end_date and end_date != '':
+            end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+            # Set the end date to the end of the day
+            end_date = datetime.combine(end_date, time.max).replace(tzinfo=None)
+        else:
+            end_date = datetime(year=9999, month=12, day=31, hour=0, minute=0, second=0)
+        products = Product.objects.annotate(salenum = Count('sale', filter=Q(sale__saletime__gte=start_date, sale__saletime__lte=end_date), distinct = True)).order_by("-salenum")
+        response.write(u'\ufeff'.encode('utf8'))
+        writer = csv.writer(response)
+        writer.writerow([start_date.strftime("%m/%d/%Y")+" - ", end_date.strftime("%m/%d/%Y")])
+        for p in products:
+            writer.writerow([p.name, str(p.salenum)])
+        return response
+    else:
         return HttpResponseRedirect('/')   
 
 ####################HELPER FUNCTIONS##################################

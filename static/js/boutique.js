@@ -79,8 +79,13 @@ function productStatus(e,t){
 		$("#productactivelabel").text("Virk");
 		$("#productactive").val("True")
 	}
-
 };
+
+function filterSalesCSV() {
+    var form = document.getElementById('salesfilter');
+    var url = 'salescsv?' + $(form).serialize();
+    window.location.href = url;
+}
 
 function changeUser(e, id, fn, ln){
 	e.preventDefault();

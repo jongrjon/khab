@@ -22,5 +22,6 @@ urlpatterns = [
     path('noregister', views.noregister, name='noregister'),
     path('paymentscsv', views.paymentscsv, name='paymentscsv'),
     path('debtcsv', views.debtcsv, name='debtcsv'),
+    path('salescsv', views.salescsv, name='salescsv'),
     path('scoreboard', views.scoreboard, name='scoreboard'),
 ]
