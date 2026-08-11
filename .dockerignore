@@ -1,0 +1,13 @@
+.git
+.gitignore
+.env
+*.pyc
+__pycache__
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+.venv
+venv/
+*.egg-info
+.claude/

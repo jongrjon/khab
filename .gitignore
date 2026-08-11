@@ -156,3 +156,14 @@ cython_debug/
 
 #email settings
 */emailsettings.py
+
+# Data exports
+data_backup.json
+staticfiles/
+
+# Local dev compose overrides
+docker-compose.override.yml
+
+# One-time SQLite import staging (scripts/migrate-legacy.sh writes the live
+# staff database here on the prod box). Must never reach this public repo.
+legacy/

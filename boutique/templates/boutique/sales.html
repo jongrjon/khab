@@ -1,117 +1,219 @@
 {%extends "boutique/base.html"%}
-{%block title%}KHAB -Sölur{%endblock%}
-{%block header%}User administration{%endblock%}
+{%load khab_filters%}
+{%block title%}KHAB - Sölur{%endblock%}
+{%block header%}Sölur{%endblock%}
 {%block content%}
-        <div class="container">
-                <form method="get" id="salesfilter" class="row row-cols-lg-auto g-3 align-items-center">
-                        <div class="col">
-                            <label for="start_date">Frá</label>
-                        </div>
-                        <div class="col">
-                          <div class="input-group">
-                            <input type="date" class="form-control" id="start_date" name="start_date" value="{{ request.GET.start_date }}">
-                          </div>
-                        </div>
-                        <div class="col">
-                            <label for="start_date">Til</label>
-                        </div>
-                        <div class="col">
-                            <div class="input-group">
-                              <input type="date" class="form-control" id="end_date" name="end_date" value="{{ request.GET.end_date }}">
-                            </div>
-                          </div>
-                      
-                        <div class="col-12">
-                          <button type="submit" class="btn btn-primary">Sía</button>
-                        </div>
-                        {%if request.user.is_superuser%}
-                        <div class="col-12">
-                                <button type="button" class="btn btn-primary" onclick="filterSalesCSV()">Sækja csv</button>
-                        </div>
-                        {%endif%}
-                </form>
-                
-                <div class="row">
-                        <div class="col">
-                                <h4>Sölutölur</h4>
-                                <table class="table table-light table-striped table-sm ">
-                                        <thead>
-                                                <tr >
-                                                        <th scope="col">Vara</th>
-                                                        <th scope="col" class="text-end">Fjöldi</th>
-                                                </tr>
-                                        </thead>
-                                        <tbody>
-                                                {%for product in products%}
-                                                <tr>
-                                                        <th scope="row">{{product.name}}</th>
-                                                        <td class="text-end">{{product.salenum}}</td>
-                                                </tr>
-                                                {%endfor%}
-                                        </tbody>
-                                </table>
-                        </div>
-                        {%if sales%}
-                        <div class="col">
-                                <h4>Söluyfirlit</h4>
-                                 <table class="table table-light table-striped table-sm ">
-                                        <thead>
-                                                <tr>
-                                                        <th scope="col">Tímasetning</th>
-                                                        <th scope="col">Notandi</th>
-                                                        <th scope="col">Vara</th>
-							<th scope="col" class="text-end">Verð</th>
-                                                </tr>
-                                        </thead>
-                                        <tbody>
-                                                {%for sale in sales%}
-						<tr onClick="editSale(event,'{{sale.buyer.first_name}}','{{sale.buyer.last_name}}',{{sale.id}},{{sale.price}},'{{sale.product.name|default_if_none:'Vara hætt'}}')">
-                                                        <th scope="row">{{sale.saletime|date:"d.m.y"}} {{sale.saletime|time:"H:i" }}</th>
-                                                        <td>{{sale.buyer.first_name}} {{sale.buyer.last_name}}</td>
-							<td>{{sale.product|default_if_none:"Vara hætt"}}</td>
-                                                        <td class="text-end">{{sale.price}} Kr.</td>
-                                                </tr>
-                                                {%endfor%}
-                                        </tbody>
-                                </table>
-                        </div>
-                        {%endif%}
-                </div>
-        </div>
-        {%if sales%}
-        <div id="editsalepopup" class="modal fade" role="dialog">
-                <div class="modal-dialog modal-lg">
-                        <div class="modal-content">
-                                <div class="modal-body">
-                                         <div class="row">
-                                                <div class="col-6">
-                                                        <h3>Breyta sölu</h4>
-                                                        <h4 id="editbuyername"></h4>
-                                                </div>
-                                                <div class ="col-6">
-                                                        <form id="deletesale" action="deletesale" form="deletesale"  method="post">
-                                                        {%csrf_token%}
-                                                                <button type="submit" id="deletesaleid" class="btn btn-danger float-end " name="deletesale" value="">Eyða sölu</button>
-                                                        </form>
-                                                </div>
-                                        </div>
-                                        <form id="editsale" method="post" action="editsale" enctype="multipart/form-data">
-                                        {%csrf_token%}
-					<div class="input-group mb-3">
-						<input type="text" id="editproduct" name="product" value= "" aria-label="Nafn vöru" class="form-control" required>
-					</div>
-                                        <div class="input-group mb-3">
-                                                <input type="number" id="editamount" name="amount" value= "" aria-label="Upphæð" class="form-control" required>
-                                                <span class="input-group-text">Kr.</span>
-                                        </div>
-                                        <div class="modal-footer">
-                                                <button type="submit" id="saleid" class="btn btn-success" name="saleid" value="">Breyta sölu</button>
-                                                <button type="button" class="btn btn-warning" name="dismiss" data-bs-dismiss="modal">Hætta við</button>
-                                        </form>
-                                </div>
-                        </div>
-                </div>
-        </div>
-        {%endif%}
-{%endblock%}
+<div class="container">
+	<!-- Quick date filters -->
+	<div class="d-flex flex-wrap gap-2 mb-3">
+		<a href="?start_date={{today|date:'Y-m-d'}}&end_date={{today|date:'Y-m-d'}}" class="btn btn-outline-danger btn-sm">Í dag</a>
+		<a href="?start_date={{week_start|date:'Y-m-d'}}&end_date={{today|date:'Y-m-d'}}" class="btn btn-outline-danger btn-sm">Þessi vika</a>
+		<a href="?start_date={{month_start|date:'Y-m-d'}}&end_date={{today|date:'Y-m-d'}}" class="btn btn-outline-danger btn-sm">Þessi mánuður</a>
+		<a href="?all=1" class="btn btn-outline-secondary btn-sm">Allt</a>
+	</div>
 
+	<!-- Date range picker -->
+	<form method="get" id="salesfilter" class="row row-cols-lg-auto g-2 align-items-center mb-4">
+		<div class="col">
+			<label for="start_date" class="form-label mb-0">Frá</label>
+		</div>
+		<div class="col">
+			<input type="date" class="form-control form-control-sm" id="start_date" name="start_date" value="{{ start_date|date:'Y-m-d' }}">
+		</div>
+		<div class="col">
+			<label for="end_date" class="form-label mb-0">Til</label>
+		</div>
+		<div class="col">
+			<input type="date" class="form-control form-control-sm" id="end_date" name="end_date" value="{{ end_date|date:'Y-m-d' }}">
+		</div>
+		<div class="col">
+			<button type="submit" class="btn btn-danger btn-sm"><i class="bi bi-funnel"></i> Sía</button>
+		</div>
+		{%if request.user.is_superuser%}
+		<div class="col">
+			<button type="button" class="btn btn-outline-danger btn-sm" onclick="filterSalesCSV()"><i class="bi bi-download"></i> CSV</button>
+		</div>
+		{%endif%}
+	</form>
+
+	<!-- Summary cards -->
+	<div class="row g-3 mb-4">
+		<div class="col-md-4">
+			<div class="card">
+				<div class="card-body text-center py-3">
+					<div class="text-muted mb-1" style="font-size:0.8rem; text-transform:uppercase; letter-spacing:0.05em;">Fjöldi sölu</div>
+					<div style="font-size:2rem; font-weight:700; color:var(--kha-red);">{{summary_count}}</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-4">
+			<div class="card">
+				<div class="card-body text-center py-3">
+					<div class="text-muted mb-1" style="font-size:0.8rem; text-transform:uppercase; letter-spacing:0.05em;">Heildartekjur</div>
+					<div style="font-size:2rem; font-weight:700; color:var(--kha-red);">{{summary_revenue|isk}} kr.</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-4">
+			<div class="card">
+				<div class="card-body text-center py-3">
+					<div class="text-muted mb-1" style="font-size:0.8rem; text-transform:uppercase; letter-spacing:0.05em;">Vinsælust</div>
+					<div style="font-size:1.4rem; font-weight:700; color:var(--kha-red);">{{top_product}}</div>
+					{%if top_product_count%}<div class="text-muted" style="font-size:0.85rem;">{{top_product_count}} seld</div>{%endif%}
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="row g-4">
+		<!-- Product breakdown -->
+		<div class="col-md-4">
+			<h5><i class="bi bi-bar-chart"></i> Sölutölur</h5>
+			<table class="table table-sm">
+				<thead>
+					<tr>
+						<th>Vara</th>
+						<th class="text-end">Fjöldi</th>
+					</tr>
+				</thead>
+				<tbody>
+					{%for product in products%}
+					{%if product.salenum > 0%}
+					<tr>
+						<td>{{product.name}}</td>
+						<td class="text-end">{{product.salenum}}</td>
+					</tr>
+					{%endif%}
+					{%endfor%}
+				</tbody>
+			</table>
+		</div>
+
+		<!-- Sales log (paginated) -->
+		{%if sales%}
+		<div class="col-md-8">
+			<div class="d-flex justify-content-between align-items-center mb-2">
+				<h5><i class="bi bi-receipt"></i> Söluyfirlit</h5>
+				{%if page_obj%}
+				<small class="text-muted">
+					Síða {{page_obj.number}} af {{page_obj.paginator.num_pages}}
+					({{page_obj.paginator.count}} sölur)
+				</small>
+				{%endif%}
+			</div>
+			<table class="table table-sm">
+				<thead>
+					<tr>
+						<th>Tímasetning</th>
+						<th>Notandi</th>
+						<th>Vara</th>
+						<th class="text-end">Verð</th>
+					</tr>
+				</thead>
+				<tbody>
+					{%for sale in sales%}
+					<tr onClick="editSale(event,'{{sale.buyer.first_name}}','{{sale.buyer.last_name}}',{{sale.id}},{{sale.price}},{{sale.product_id|default:'null'}})">
+						<td>{{sale.saletime|date:"d.m.y"}} {{sale.saletime|time:"H:i" }}</td>
+						<td>{{sale.buyer.first_name}} {{sale.buyer.last_name}}</td>
+						<td>{{sale.product|default_if_none:"Vara hætt"}}</td>
+						<td class="text-end">{{sale.price|isk}} kr.</td>
+					</tr>
+					{%endfor%}
+				</tbody>
+			</table>
+
+			<!-- Pagination -->
+			{%if page_obj.paginator.num_pages > 1%}
+			<nav>
+				<ul class="pagination pagination-sm justify-content-center">
+					{%if page_obj.has_previous%}
+					<li class="page-item">
+						<a class="page-link" href="?start_date={{start_date|date:'Y-m-d'}}&end_date={{end_date|date:'Y-m-d'}}&page={{page_obj.previous_page_number}}">
+							<i class="bi bi-chevron-left"></i>
+						</a>
+					</li>
+					{%endif%}
+
+					{%for num in page_obj.paginator.page_range%}
+						{%if page_obj.number == num%}
+						<li class="page-item active"><span class="page-link">{{num}}</span></li>
+						{%elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3"%}
+						<li class="page-item">
+							<a class="page-link" href="?start_date={{start_date|date:'Y-m-d'}}&end_date={{end_date|date:'Y-m-d'}}&page={{num}}">{{num}}</a>
+						</li>
+						{%elif num == 1 or num == page_obj.paginator.num_pages%}
+						<li class="page-item">
+							<a class="page-link" href="?start_date={{start_date|date:'Y-m-d'}}&end_date={{end_date|date:'Y-m-d'}}&page={{num}}">{{num}}</a>
+						</li>
+						{%endif%}
+					{%endfor%}
+
+					{%if page_obj.has_next%}
+					<li class="page-item">
+						<a class="page-link" href="?start_date={{start_date|date:'Y-m-d'}}&end_date={{end_date|date:'Y-m-d'}}&page={{page_obj.next_page_number}}">
+							<i class="bi bi-chevron-right"></i>
+						</a>
+					</li>
+					{%endif%}
+				</ul>
+			</nav>
+			{%endif%}
+		</div>
+		{%endif%}
+	</div>
+</div>
+
+{%if sales%}
+<div id="editsalepopup" class="modal fade" role="dialog">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Breyta sölu</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+			</div>
+			<div class="modal-body">
+				<h6 id="editbuyername" class="text-muted mb-3"></h6>
+				<form id="editsale" method="post" action="editsale">
+				{%csrf_token%}
+				<div class="mb-3">
+					<label class="form-label">Vara</label>
+					<select id="editproduct" name="product" class="form-select" required>
+						<option value="">-- Veldu vöru --</option>
+						{%for p in all_products%}
+						<option value="{{p.id}}" data-price="{{p.current_price}}">{{p.name}} ({{p.current_price}} kr.){%if p.offer_active%} - Tilboð{%endif%}</option>
+						{%endfor%}
+					</select>
+				</div>
+				<div class="mb-3">
+					<label class="form-label">Verð</label>
+					<div class="input-group">
+						<input type="number" id="editamount" name="amount" class="form-control" required>
+						<span class="input-group-text">Kr.</span>
+					</div>
+				</div>
+				<div class="d-flex justify-content-between">
+					<button type="submit" id="saleid" class="btn btn-success" name="saleid" value=""><i class="bi bi-check-lg"></i> Vista</button>
+					<div class="d-flex gap-2">
+						<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hætta við</button>
+					</div>
+				</div>
+				</form>
+				<form id="deletesale" action="deletesale" method="post" class="mt-2 text-end">
+					{%csrf_token%}
+					<button type="submit" id="deletesaleid" class="btn btn-outline-danger btn-sm" name="deletesale" value=""><i class="bi bi-trash"></i> Eyða sölu</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+{%endif%}
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+	var sel = document.getElementById('editproduct');
+	if(sel) sel.addEventListener('change', function(){
+		var opt = this.options[this.selectedIndex];
+		if(opt && opt.dataset.price) document.getElementById('editamount').value = opt.dataset.price;
+	});
+});
+</script>
+{%endblock%}

@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="is">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	{%load static khab_filters%}
+	<link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
+	<link rel="icon" type="image/png" sizes="32x32" href="{% static 'favicon-32.png' %}">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+	<link href="{% static 'css/boutique.css' %}" rel="stylesheet">
+	<link href="{% static 'css/vendor.css' %}" rel="stylesheet">
+	<title>KHA Boutique - {{buyer.first_name}}</title>
+</head>
+<body class="vendor-body">
+	<script src="{% static 'js/bootstrap.bundle.min.js'%}"></script>
+
+	<!-- Top bar -->
+	<div class="vendor-topbar d-flex align-items-center justify-content-between px-3 py-2">
+		<div class="d-flex align-items-center gap-3">
+			<h2 class="vendor-logo mb-0">KHA Boutique</h2>
+		</div>
+		<div class="d-flex align-items-center gap-3">
+			{%if buyer_avatar%}
+			<img src="{{buyer_avatar}}" class="vendor-topbar-avatar" alt="{{buyer.first_name}}">
+			{%else%}
+			<div class="vendor-topbar-avatar-placeholder">
+				<span>{{buyer.first_name|first}}{{buyer.last_name|first}}</span>
+			</div>
+			{%endif%}
+			<span class="vendor-buyer-name">{{buyer.first_name}} {{buyer.last_name}}</span>
+			<a href="/vendor/" class="btn btn-outline-light btn-lg vendor-exit-btn" id="exitBtn" title="Loka">&times;</a>
+		</div>
+	</div>
+
+	<!-- Products grid -->
+	<div class="container-fluid px-3 pt-3 pb-5 mb-5">
+		<div class="row row-cols-2 row-cols-md-3 row-cols-lg-5 g-3">
+			{%for product in products%}
+			<div class="col">
+				<div class="card vendor-product-card" data-product-id="{{product.id}}" data-product-name="{{product.name}}" data-product-price="{{product.current_price}}">
+					<div class="product-img-wrap">
+						{%if product.offer_active%}<div class="offer-banner">Tilboð</div>{%endif%}
+						<img src="/media/{{product.prod_img}}" class="card-img-top thumbnail" alt="{{product.name}}">
+					</div>
+					<div class="card-body py-2 px-2">
+						<p class="card-title vendor-product-name mb-1">{{product.name}}</p>
+						<div class="product-price-area mb-2">
+							{%if product.offer_active and product.offer_price%}
+							<span class="vendor-product-price offer-price-current">{{product.offer_price|isk}} kr.</span>
+							<span class="offer-price-original">{{product.price|isk}} kr.</span>
+							{%else%}
+							<span class="vendor-product-price">{{product.price|isk}} kr.</span>
+							{%endif%}
+						</div>
+						<div class="d-flex gap-1">
+							<button class="btn btn-danger flex-fill" onclick="buySingle({{product.id}}, '{{product.name}}', {{product.current_price}})"><i class="bi bi-bag-check"></i> Kaupa</button>
+							<button class="btn btn-outline-danger flex-fill" onclick="addToCart({{product.id}}, '{{product.name}}', {{product.current_price}})"><i class="bi bi-cart-plus"></i> Karfa</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			{%endfor%}
+		</div>
+	</div>
+
+	<!-- Cart bar (fixed bottom) -->
+	<div id="cartBar" class="vendor-cart-bar" style="display:none;" onclick="openCartModal()">
+		<div class="d-flex align-items-center justify-content-center gap-3 py-2">
+			<i class="bi bi-cart-fill fs-4"></i>
+			<span id="cartCount" class="badge bg-white text-danger fs-6">0</span>
+			<span id="cartTotal" class="fs-5 fw-bold">0 kr.</span>
+		</div>
+	</div>
+
+	<!-- Cart detail modal -->
+	<div id="cartModal" class="modal fade" tabindex="-1">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title"><i class="bi bi-cart-fill"></i> Karfa</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+				</div>
+				<div class="modal-body" id="cartItems"></div>
+				<div class="modal-footer justify-content-between">
+					<span class="fs-5 fw-bold" id="cartModalTotal">0 kr.</span>
+					<div class="d-flex gap-2">
+						<button class="btn btn-outline-secondary" onclick="clearCart()"><i class="bi bi-trash"></i> Hreinsa</button>
+						<button class="btn btn-success" onclick="checkout()"><i class="bi bi-bag-check"></i> Borga</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Purchase toast -->
+	<div class="position-fixed top-0 start-50 translate-middle-x p-3" style="z-index:1100;">
+		<div id="purchaseToast" class="toast align-items-center border-0" role="alert">
+			<div class="d-flex">
+				<div class="toast-body fs-5" id="toastMessage"></div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+	function iskFormat(num) {
+		return Math.abs(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+	}
+
+	const BUYER_ID = {{buyer.id}};
+	const CSRF_TOKEN = '{{csrf_token}}';
+	const INACTIVITY_TIMEOUT = 120000; // 2 minutes
+	const TOAST_DURATION = 3000;       // 3 seconds before redirect
+	let cart = {};
+	let inactivityTimer = null;
+
+	// --- Inactivity timeout ---
+	function resetInactivityTimer() {
+		clearTimeout(inactivityTimer);
+		inactivityTimer = setTimeout(function() {
+			window.location.href = '/vendor/';
+		}, INACTIVITY_TIMEOUT);
+	}
+
+	document.addEventListener('click', resetInactivityTimer);
+	document.addEventListener('touchstart', resetInactivityTimer);
+	document.addEventListener('scroll', resetInactivityTimer);
+	resetInactivityTimer();
+
+	// Stagger animation for product cards
+	document.querySelectorAll('.vendor-product-card').forEach(function(card, i) {
+		card.style.animationDelay = (i * 30) + 'ms';
+	});
+
+	// --- Cart functions ---
+	function addToCart(productId, name, price) {
+		resetInactivityTimer();
+		if (cart[productId]) {
+			cart[productId].quantity += 1;
+		} else {
+			cart[productId] = {name: name, price: price, quantity: 1};
+		}
+		renderCart();
+	}
+
+	function removeFromCart(productId) {
+		delete cart[productId];
+		renderCart();
+	}
+
+	function adjustQuantity(productId, delta) {
+		if (cart[productId]) {
+			cart[productId].quantity += delta;
+			if (cart[productId].quantity <= 0) {
+				delete cart[productId];
+			}
+		}
+		renderCart();
+	}
+
+	function clearCart() {
+		cart = {};
+		renderCart();
+		// Close modal if open
+		let modalEl = document.getElementById('cartModal');
+		let modal = bootstrap.Modal.getInstance(modalEl);
+		if (modal) modal.hide();
+	}
+
+	function openCartModal() {
+		resetInactivityTimer();
+		renderCartModal();
+		let modal = new bootstrap.Modal(document.getElementById('cartModal'));
+		modal.show();
+	}
+
+	function renderCart() {
+		let bar = document.getElementById('cartBar');
+		let countSpan = document.getElementById('cartCount');
+		let totalSpan = document.getElementById('cartTotal');
+		let keys = Object.keys(cart);
+
+		if (keys.length === 0) {
+			bar.style.display = 'none';
+			let modalEl = document.getElementById('cartModal');
+			let modal = bootstrap.Modal.getInstance(modalEl);
+			if (modal) modal.hide();
+			return;
+		}
+
+		let total = 0;
+		let count = 0;
+		keys.forEach(function(pid) {
+			total += cart[pid].price * cart[pid].quantity;
+			count += cart[pid].quantity;
+		});
+
+		bar.style.display = 'block';
+		countSpan.textContent = count;
+		totalSpan.textContent = iskFormat(total) + ' kr.';
+
+		// Bounce the count badge
+		countSpan.classList.remove('cart-count-bounce');
+		void countSpan.offsetWidth; // trigger reflow
+		countSpan.classList.add('cart-count-bounce');
+
+		// Also update modal content if it's open
+		renderCartModal();
+	}
+
+	function renderCartModal() {
+		let itemsDiv = document.getElementById('cartItems');
+		let modalTotal = document.getElementById('cartModalTotal');
+		let keys = Object.keys(cart);
+		let total = 0;
+		let html = '';
+
+		if (keys.length === 0) {
+			html = '<p class="text-muted text-center">Karfan er tóm</p>';
+		} else {
+			keys.forEach(function(pid) {
+				let item = cart[pid];
+				let subtotal = item.price * item.quantity;
+				total += subtotal;
+				html += '<div class="d-flex align-items-center justify-content-between py-2 border-bottom">';
+				html += '<div><strong>' + item.name + '</strong><br><small class="text-muted">' + iskFormat(item.price) + ' kr. stk</small></div>';
+				html += '<div class="d-flex align-items-center gap-2">';
+				html += '<button class="btn btn-sm btn-outline-secondary" onclick="adjustQuantity(' + pid + ', -1)">&minus;</button>';
+				html += '<span class="badge bg-secondary fs-6">' + item.quantity + '</span>';
+				html += '<button class="btn btn-sm btn-outline-secondary" onclick="adjustQuantity(' + pid + ', 1)">&plus;</button>';
+				html += '<button class="btn btn-sm btn-outline-danger" onclick="removeFromCart(' + pid + ')"><i class="bi bi-trash"></i></button>';
+				html += '</div></div>';
+			});
+		}
+
+		itemsDiv.innerHTML = html;
+		modalTotal.textContent = iskFormat(total) + ' kr.';
+	}
+
+	// --- Single buy ---
+	function buySingle(productId, name, price) {
+		resetInactivityTimer();
+		submitPurchase([{product_id: productId, quantity: 1}]);
+	}
+
+	// --- Checkout cart ---
+	function checkout() {
+		let items = [];
+		Object.keys(cart).forEach(function(pid) {
+			items.push({product_id: parseInt(pid), quantity: cart[pid].quantity});
+		});
+		if (items.length === 0) return;
+		submitPurchase(items);
+	}
+
+	function submitPurchase(items) {
+		fetch('/vendor/checkout/', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'X-CSRFToken': CSRF_TOKEN,
+			},
+			body: JSON.stringify({user_id: BUYER_ID, items: items})
+		})
+		.then(function(r) { return r.json(); })
+		.then(function(data) {
+			if (data.status === 'success') {
+				clearCart();
+				// Redirect immediately — splash screen shows the toast
+				window.location.href = '/vendor/?msg=' + encodeURIComponent(data.message);
+			} else {
+				showToast(data.message, false);
+			}
+		})
+		.catch(function() {
+			showToast('Eitthvað fór úrskeiðis. Reyndu aftur.', false);
+		});
+	}
+
+	function showToast(message, success) {
+		let toastEl = document.getElementById('purchaseToast');
+		let msgEl = document.getElementById('toastMessage');
+		msgEl.textContent = message;
+		toastEl.className = 'toast align-items-center border-0 text-white ' +
+			(success ? 'bg-success' : 'bg-danger');
+		let toast = new bootstrap.Toast(toastEl, {delay: 5000});
+		toast.show();
+	}
+	</script>
+</body>
+</html>

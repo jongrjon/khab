@@ -1,52 +1,116 @@
 {%extends "boutique/base.html"%}
-{%block title%}KHAB - Users{%endblock%}
-{%block header%}User administration{%endblock%}
+{%load khab_filters%}
+{%block title%}KHAB - Stöðutafla{%endblock%}
 {%block content%}
 <div class="container">
-    
-    <form method="get" class="row row-cols-lg-auto g-3 align-items-center">
-        <div class="col">
-            <label for="start_date">Frá</label>
-        </div>
-        <div class="col">
-          <div class="input-group">
-            <input type="date" class="form-control" id="start_date" name="start_date" value="{{ request.GET.start_date }}">
-          </div>
-        </div>
-        <div class="col">
-            <label for="start_date">Til</label>
-        </div>
-        <div class="col">
-            <div class="input-group">
-              <input type="date" class="form-control" id="end_date" name="end_date" value="{{ request.GET.end_date }}">
-            </div>
-          </div>
-      
-        <div class="col-12">
-          <button type="submit" class="btn btn-primary">Sía</button>
-        </div>
-    </form>
+	<h3 class="mb-4"><i class="bi bi-trophy"></i> Stöðutafla</h3>
 
-{%if users%}
-	{%for user in users%}
-        <div class="row align-items-center">
-                <div class="col-3 align-middle">
-                        <h6>{{user.name}}</h6>
-                </div>
-                <div class="col align-middle">
-                    {%if user.name == current%}
-                        <div class="progress">
-                            <div class="progress-bar bg-danger" role="progressbar" style="width: {{user.sales}}%" aria-valuenow="{{user.sales}}" aria-valuemin="0" aria-valuemax="100">{{user.sales}}%</div>
-                        </div>
-                    {%else%}
-                        <div class="progress">
-                            <div class="progress-bar" role="progressbar" style="width: {{user.sales}}%" aria-valuenow="{{user.sales}}" aria-valuemin="0" aria-valuemax="100">{{user.sales}}%</div>
-                        </div>
-                    {%endif%}
-                </div>
-        </div>
-    
-	{% endfor %}
-{% endif %}
+	<!-- Date filter -->
+	<form method="get" class="row row-cols-lg-auto g-2 align-items-center mb-4">
+		<div class="col">
+			<label for="start_date" class="form-label mb-0">Frá</label>
+		</div>
+		<div class="col">
+			<input type="date" class="form-control form-control-sm" id="start_date" name="start_date" value="{{start_date}}">
+		</div>
+		<div class="col">
+			<label for="end_date" class="form-label mb-0">Til</label>
+		</div>
+		<div class="col">
+			<input type="date" class="form-control form-control-sm" id="end_date" name="end_date" value="{{end_date}}">
+		</div>
+		<div class="col">
+			<button type="submit" class="btn btn-danger btn-sm"><i class="bi bi-funnel"></i> Sía</button>
+		</div>
+	</form>
+
+	<!-- Fun stats -->
+	{%if stats%}
+	<div class="row g-3 mb-4">
+		<div class="col-md-3">
+			<div class="card">
+				<div class="card-body text-center py-3">
+					<div class="text-muted mb-1" style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em;">Heildarkaup</div>
+					<div style="font-size:1.8rem; font-weight:700;">{{stats.total_purchases}}</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-3">
+			<div class="card">
+				<div class="card-body text-center py-3">
+					<div class="text-muted mb-1" style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em;">Heildarsala</div>
+					<div style="font-size:1.8rem; font-weight:700; color:var(--kha-red);">{{stats.total_revenue|isk}} kr.</div>
+				</div>
+			</div>
+		</div>
+		{%if stats.top_product%}
+		<div class="col-md-3">
+			<div class="card">
+				<div class="card-body text-center py-3">
+					<div class="text-muted mb-1" style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em;"><i class="bi bi-star"></i> Vinsælust</div>
+					<div style="font-size:1.1rem; font-weight:700;">{{stats.top_product.name}}</div>
+					<div class="text-muted" style="font-size:0.85rem;">{{stats.top_product.count}} seld</div>
+				</div>
+			</div>
+		</div>
+		{%endif%}
+		{%if stats.avg_price%}
+		<div class="col-md-3">
+			<div class="card">
+				<div class="card-body text-center py-3">
+					<div class="text-muted mb-1" style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em;"><i class="bi bi-calculator"></i> Meðalkaup</div>
+					<div style="font-size:1.8rem; font-weight:700;">{{stats.avg_price|isk}} kr.</div>
+				</div>
+			</div>
+		</div>
+		{%endif%}
+	</div>
+	{%endif%}
+
+	<!-- Ranking bars -->
+	{%if users%}
+	<div class="card">
+		<div class="card-body">
+			<table class="table table-sm mb-0">
+				<colgroup>
+					<col style="width:30px;">
+					<col style="width:200px;">
+					<col>
+					<col style="width:70px;">
+				</colgroup>
+				<tbody>
+				{%for user in users%}
+				<tr>
+					<td class="align-middle text-center pe-0">
+						{%if forloop.counter <= 3 and user.pct > 0%}
+							{%if forloop.counter == 1%}<i class="bi bi-trophy-fill text-warning"></i>{%endif%}
+							{%if forloop.counter == 2%}<i class="bi bi-trophy-fill" style="color:#aaa;"></i>{%endif%}
+							{%if forloop.counter == 3%}<i class="bi bi-trophy-fill" style="color:#cd7f32;"></i>{%endif%}
+						{%else%}
+							<span class="text-muted" style="font-size:0.8rem;">{{forloop.counter}}</span>
+						{%endif%}
+					</td>
+					<td class="align-middle">
+						<span class="fw-bold{%if user.is_current%} text-danger{%endif%}" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block; max-width:200px;">
+							{{user.name}}
+						</span>
+					</td>
+					<td class="align-middle">
+						<div class="progress" style="height:22px;">
+							<div class="progress-bar {%if user.is_current%}bg-danger{%endif%}" role="progressbar" style="width:{{user.pct}}%;" aria-valuenow="{{user.pct}}" aria-valuemin="0" aria-valuemax="100">
+								{%if user.pct > 10%}{{user.pct}}%{%endif%}
+							</div>
+						</div>
+					</td>
+					<td class="align-middle text-end text-muted" style="font-size:0.85rem;">
+						{{user.purchase_count}} kaup
+					</td>
+				</tr>
+				{%endfor%}
+				</tbody>
+			</table>
+		</div>
+	</div>
+	{%endif%}
 </div>
 {%endblock%}

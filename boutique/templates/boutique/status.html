@@ -1,82 +1,177 @@
 {%extends "boutique/base.html"%}
-{%block title%}KHA Boutique{%endblock%}
-{%block header%}{{user.first_name}} {{user.last_name}}{%endblock%}
+{%load khab_filters%}
+{%block title%}KHA Boutique - {{user.first_name}}{%endblock%}
 {%block content%}
-	<div class="container">
-		<div class="row">
-			<div class="col">
-				<h1>{{user.first_name}} {{user.last_name}}</h1>
-				<button class="btn btn-primary btn-sm" onClick="changeUser(event,{{user.id}},'{{user.first_name}}','{{user.last_name}}')" >Breyta upplýsingum</button>
+<!-- Profile header -->
+<div class="card mb-4">
+	<div class="card-body py-4">
+		<div class="d-flex align-items-center gap-4">
+			<!-- Avatar -->
+			{%if avatar_url%}
+			<img src="{{avatar_url}}" class="rounded-circle" style="width:96px; height:96px; object-fit:cover; box-shadow: var(--kha-shadow);" alt="{{user.first_name}}">
+			{%else%}
+			<div class="rounded-circle d-flex align-items-center justify-content-center" style="width:96px; height:96px; background:linear-gradient(135deg, var(--kha-red), var(--kha-red-dark)); color:white; font-weight:700; font-size:2rem; box-shadow: var(--kha-shadow);">
+				{{initials}}
 			</div>
-			<div class="col text-end">
-				<h4>Viðskiptastaða</h4>
-				<h4><span class="badge bg-{%if debt < 0%}danger{%else%}success{%endif%}">{{debt}} kr</span></h4>
+			{%endif%}
+
+			<!-- Name and actions -->
+			<div class="flex-grow-1">
+				<h2 class="mb-1" style="font-weight:700; letter-spacing:-0.02em;">{{user.first_name}} {{user.last_name}}</h2>
+				<p class="text-muted mb-2">{{user.email}}</p>
+				{%if password%}
+				<button class="btn btn-outline-danger btn-sm" onClick="changeUser(event,{{user.id}},'{{user.first_name}}','{{user.last_name}}')">
+					<i class="bi bi-pencil"></i> Breyta upplýsingum
+				</button>
+				{%endif%}
 			</div>
-		</div>
-		<div class="row">
-			<div class="col">
-				<h4>Keyptar vörur</h4>
-				<table class="table table-light table-striped table-sm ">
-  					<thead>
-    						<tr>
-      							<th scope="col">Tímasetning</th>
-      							<th scope="col">Vara</th>
-      							<th scope="col" class="text-end">Verð</th>
-    						</tr>
-  					</thead>
-  					<tbody>
-						{%for pur in purchase%}
-    						<tr>
-							<th scope="row">{{ pur.saletime|date:"d.m.y" }} {{ pur.saletime|time:"H:i" }}</th>
-      							<td>{{ pur.product|default_if_none:"Vara hætt" }}</td>
-      							<td class="text-end">{{pur.price}} Kr.</td>
-    						</tr>
-						{%endfor%}
-					</tbody>
-				</table>
-			</div>
-			<div class="col">
-				<h4>Innborganir</h4>
-				 <table class="table table-light table-striped table-sm ">
-                                        <thead>
-                                                <tr>
-                                                        <th scope="col">Tímasetning</th>
-							<th scope="col" class="text-end">Upphæð</th>
-                                                </tr>
-                                        </thead>
-                                        <tbody>
-                                                {%for paid in payment%}
-                                                <tr>
-                                                        <th scope="row">{{ paid.paytime|date:"d.m.y" }} {{ paid.paytime|time:"H:i" }}</th>
-                                                        <td class="text-end">{{ paid.amount}} Kr.</td>
-                                                </tr>
-                                                {%endfor%}
-                                        </tbody>
-                                </table>
+
+			<!-- Debt status -->
+			<div class="text-end">
+				<div class="text-muted mb-1" style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em;">Viðskiptastaða</div>
+				<div style="font-size:2.2rem; font-weight:700; color:{%if debt < 0%}var(--kha-red){%else%}#16a34a{%endif%};">
+					{{debt|isk}} kr.
+				</div>
 			</div>
 		</div>
 	</div>
-	<div id="edituserpopup" class="modal fade" role="dialog">
-                <div class="modal-dialog modal-lg">
-                        <div class="modal-content">
-                                <div class="modal-body">
-                                        <h3>Breyta notanda</h4>
-                                        <form id="edituser" method="post" enctype="multipart/form-data">
-                                        {%csrf_token%}
-                                        <div class="input-group mb-3">
-                                                <input type="text" id="editfn" name="fn" value= "" aria-label="Fyrra nafn" class="form-control" required>
-                                        </div>
-					<div class="input-group mb-3">
-                                                <input type="text" id="editln" name="ln" value= "" aria-label="Fyrra nafn" class="form-control" required>
-                                        </div>
+</div>
 
-                                        <div class="modal-footer">
-                                                <button type="submit" id="userid" class="btn btn-success" name="userid" value="">Breyta notanda</button>
-                                                <button type="button" class="btn btn-warning" name="dismiss" data-bs-dismiss="modal">Hætta við</button>
-                                        </form>
-                                </div>
-                        </div>
-                </div>
-        </div>
-	
+<!-- Stats row -->
+<div class="row g-3 mb-4">
+	<div class="col-md-4">
+		<div class="card">
+			<div class="card-body text-center py-3">
+				<div class="text-muted mb-1" style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em;">Fjöldi kaupa</div>
+				<div style="font-size:1.8rem; font-weight:700;">{{total_purchases}}</div>
+			</div>
+		</div>
+	</div>
+	<div class="col-md-4">
+		<div class="card">
+			<div class="card-body text-center py-3">
+				<div class="text-muted mb-1" style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em;">Heildarviðskipti</div>
+				<div style="font-size:1.8rem; font-weight:700; color:var(--kha-red);">{{total_spent|isk}} kr.</div>
+			</div>
+		</div>
+	</div>
+	<div class="col-md-4">
+		<div class="card">
+			<div class="card-body text-center py-3">
+				<div class="text-muted mb-1" style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em;">Heildarinnborganir</div>
+				<div style="font-size:1.8rem; font-weight:700; color:#16a34a;">{{total_paid|isk}} kr.</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Tables -->
+<div class="row g-4">
+	<div class="col-md-7">
+		{%if product_summary%}
+		<div class="card mb-3">
+			<div class="card-body">
+				<h5 class="mb-3"><i class="bi bi-bar-chart"></i> Vöruyfirlit</h5>
+				<div class="table-responsive" style="max-height:500px; overflow-y:auto;">
+				<table class="table table-sm mb-0">
+					<thead>
+						<tr>
+							<th>Vara</th>
+							<th class="text-end">Fjöldi</th>
+						</tr>
+					</thead>
+					<tbody>
+						{%for item in product_summary%}
+						<tr>
+							<td>{{item.product__name|default:"Vara hætt"}}</td>
+							<td class="text-end">{{item.count}}</td>
+						</tr>
+						{%endfor%}
+					</tbody>
+				</table>
+				</div>
+			</div>
+		</div>
+		{%endif%}
+		<div class="card">
+			<div class="card-body">
+				<h5 class="mb-3"><i class="bi bi-bag"></i> Keyptar vörur</h5>
+				<div class="table-responsive" style="max-height:500px; overflow-y:auto;">
+					<table class="table table-sm mb-0">
+						<thead>
+							<tr>
+								<th>Tímasetning</th>
+								<th>Vara</th>
+								<th class="text-end">Verð</th>
+							</tr>
+						</thead>
+						<tbody>
+							{%for pur in purchase%}
+							<tr>
+								<td>{{ pur.saletime|date:"d.m.y" }} {{ pur.saletime|time:"H:i" }}</td>
+								<td>{{ pur.product|default_if_none:"Vara hætt" }}</td>
+								<td class="text-end">{{pur.price|isk}} kr.</td>
+							</tr>
+							{%endfor%}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="col-md-5">
+		<div class="card">
+			<div class="card-body">
+				<h5 class="mb-3"><i class="bi bi-wallet2"></i> Innborganir</h5>
+				<div class="table-responsive" style="max-height:500px; overflow-y:auto;">
+					<table class="table table-sm mb-0">
+						<thead>
+							<tr>
+								<th>Tímasetning</th>
+								<th class="text-end">Upphæð</th>
+							</tr>
+						</thead>
+						<tbody>
+							{%for paid in payment%}
+							<tr>
+								<td>{{ paid.paytime|date:"d.m.y" }} {{ paid.paytime|time:"H:i" }}</td>
+								<td class="text-end">{{ paid.amount|isk}} kr.</td>
+							</tr>
+							{%endfor%}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Edit user modal -->
+<div id="edituserpopup" class="modal fade" role="dialog">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Breyta notanda</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+			</div>
+			<div class="modal-body">
+				<form id="edituser" method="post">
+				{%csrf_token%}
+				<div class="mb-3">
+					<label class="form-label">Fornafn</label>
+					<input type="text" id="editfn" name="fn" class="form-control" required>
+				</div>
+				<div class="mb-3">
+					<label class="form-label">Eftirnafn</label>
+					<input type="text" id="editln" name="ln" class="form-control" required>
+				</div>
+				<div class="d-flex justify-content-between">
+					<button type="submit" id="userid" class="btn btn-success" name="userid" value=""><i class="bi bi-check-lg"></i> Vista</button>
+					<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hætta við</button>
+				</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
 {%endblock%}

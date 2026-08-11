@@ -1,0 +1,154 @@
+{%extends "boutique/base.html"%}
+{%load khab_filters%}
+{%block title%}KHAB - Yfirlit{%endblock%}
+{%block content%}
+<div class="container">
+	<div class="d-flex justify-content-between align-items-center mb-4">
+		<h3 class="mb-0"><i class="bi bi-speedometer2"></i> Yfirlit</h3>
+		<span class="text-muted">{{today|date:"d. F Y"}}</span>
+	</div>
+
+	<!-- Top-level stats -->
+	<div class="row g-3 mb-4">
+		<div class="col-md-3">
+			<div class="card">
+				<div class="card-body text-center py-3">
+					<div class="text-muted mb-1" style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em;">Heildarstaða</div>
+					<div style="font-size:2rem; font-weight:700; color:{%if total_debt < 0%}var(--kha-red){%else%}#16a34a{%endif%};">
+						{{total_debt|isk}} kr.
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-3">
+			<div class="card">
+				<div class="card-body text-center py-3">
+					<div class="text-muted mb-1" style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em;">{{this_month_name}} - Sala</div>
+					<div style="font-size:2rem; font-weight:700; color:var(--kha-red);">{{this_month.revenue|isk}} kr.</div>
+					<div class="text-muted" style="font-size:0.85rem;">{{this_month.count}} sölur</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-3">
+			<div class="card">
+				<div class="card-body text-center py-3">
+					<div class="text-muted mb-1" style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em;">{{last_month_name}} - Sala</div>
+					<div style="font-size:2rem; font-weight:700;">{{last_month.revenue|isk}} kr.</div>
+					<div class="text-muted" style="font-size:0.85rem;">{{last_month.count}} sölur</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-3">
+			<div class="card">
+				<div class="card-body text-center py-3">
+					<div class="text-muted mb-1" style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em;">Virkir notendur</div>
+					<div style="font-size:2rem; font-weight:700;">{{active_users}}</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="row g-4">
+		<!-- Debtors -->
+		<div class="col-md-5">
+			<div class="card">
+				<div class="card-body">
+					<h5 class="mb-3"><i class="bi bi-exclamation-triangle text-danger"></i> Skuldir</h5>
+					{%if debtors%}
+					<table class="table table-sm mb-0">
+						<thead>
+							<tr>
+								<th>Notandi</th>
+								<th class="text-end">Staða</th>
+							</tr>
+						</thead>
+						<tbody>
+							{%for d in debtors%}
+							<tr>
+								<td><a href="/users/{{d.id}}" class="fw-bold">{{d.name}}</a></td>
+								<td class="text-end"><span class="badge bg-danger">{{d.debt|isk}} kr.</span></td>
+							</tr>
+							{%endfor%}
+						</tbody>
+					</table>
+					{%else%}
+					<p class="text-muted mb-0">Enginn skuldar!</p>
+					{%endif%}
+				</div>
+			</div>
+		</div>
+
+		<!-- Product trends -->
+		<div class="col-md-7">
+			<div class="card">
+				<div class="card-body">
+					<h5 class="mb-3"><i class="bi bi-graph-up-arrow"></i> Vöruþróun</h5>
+					{%if product_trends%}
+					<table class="table table-sm mb-0">
+						<thead>
+							<tr>
+								<th>Vara</th>
+								<th class="text-end">{{this_month_name}}</th>
+								<th class="text-end">{{last_month_name}}</th>
+								<th class="text-end">Breyting</th>
+							</tr>
+						</thead>
+						<tbody>
+							{%for p in product_trends%}
+							<tr>
+								<td>{{p.name}}</td>
+								<td class="text-end">{{p.this_month}}</td>
+								<td class="text-end text-muted">{{p.last_month}}</td>
+								<td class="text-end">
+									{%if p.diff > 0%}
+									<span class="text-success"><i class="bi bi-arrow-up-short"></i>+{{p.diff}}</span>
+									{%elif p.diff < 0%}
+									<span class="text-danger"><i class="bi bi-arrow-down-short"></i>{{p.diff}}</span>
+									{%else%}
+									<span class="text-muted">&mdash;</span>
+									{%endif%}
+								</td>
+							</tr>
+							{%endfor%}
+						</tbody>
+					</table>
+					{%else%}
+					<p class="text-muted mb-0">Engar sölur til samanburðar.</p>
+					{%endif%}
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Recent sales -->
+	<div class="card mt-4">
+		<div class="card-body">
+			<h5 class="mb-3"><i class="bi bi-clock-history"></i> Nýlegar sölur</h5>
+			{%if recent_sales%}
+			<table class="table table-sm mb-0">
+				<thead>
+					<tr>
+						<th>Tími</th>
+						<th>Notandi</th>
+						<th>Vara</th>
+						<th class="text-end">Verð</th>
+					</tr>
+				</thead>
+				<tbody>
+					{%for sale in recent_sales%}
+					<tr>
+						<td>{{sale.saletime|date:"d.m.y H:i"}}</td>
+						<td>{{sale.buyer.first_name}} {{sale.buyer.last_name}}</td>
+						<td>{{sale.product|default_if_none:"Vara hætt"}}</td>
+						<td class="text-end">{{sale.price|isk}} kr.</td>
+					</tr>
+					{%endfor%}
+				</tbody>
+			</table>
+			{%else%}
+			<p class="text-muted mb-0">Engar sölur.</p>
+			{%endif%}
+		</div>
+	</div>
+</div>
+{%endblock%}

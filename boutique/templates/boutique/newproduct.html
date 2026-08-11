@@ -42,7 +42,19 @@
 							<input type="number" placeholder="Verð" aria-label="Verð" name="productprice" {%if product%}value={{product.price}}{%endif%} class="form-control" required >
 							<span class="input-group-text">Kr.</span>
 						</div>
-						<input class="form-check-input form-control" type="checkbox" id="banani" name="banani" value =""}>
+						<div class="card mb-3" style="border-color:var(--kha-red-light);">
+							<div class="card-body py-2">
+								<div class="form-check form-switch mb-2">
+									<input class="form-check-input" type="checkbox" id="offertoggle" name="offertoggle" onchange="document.getElementById('offerpricefield').style.display = this.checked ? 'flex' : 'none'" {%if product.offer_active%}checked{%endif%}>
+									<label class="form-check-label fw-bold" for="offertoggle" style="color:var(--kha-red);">Tilboð í gangi</label>
+								</div>
+								<div class="input-group" id="offerpricefield" style="display:{%if product.offer_active%}flex{%else%}none{%endif%};">
+									<span class="input-group-text">Tilboðsverð</span>
+									<input type="number" name="offerprice" placeholder="Tilboðsverð" class="form-control" {%if product.offer_price%}value={{product.offer_price}}{%endif%}>
+									<span class="input-group-text">Kr.</span>
+								</div>
+							</div>
+						</div>
 						<div class="modal-footer justify-content-between">
 							<div class="col">
 								<div class="form-check form-switch">

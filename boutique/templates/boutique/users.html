@@ -1,83 +1,201 @@
 {%extends "boutique/base.html"%}
-{%block title%}KHAB - Users{%endblock%}
-{%block header%}User administration{%endblock%}
+{%load khab_filters%}
+{%block title%}KHAB - Notendur{%endblock%}
 {%block content%}
-<button class="btn btn-warning mb-3" onClick="newInvite(event)">Bjóða notanda</button>
-{%if invites%}
-<ul class="list-group">
-	<h4>Boðnir notendur</h4>
-        {%for invite in invites%}
-                <li class="list-group-item d-flex justify-content-between align-items-start">
-                        <div class="ms-2 me-auto">
-                                <div class ="fw-bold">{{invite.invited}}</div>
-                                <span class="badge bg-warning">{{invite.timeout}}</span>
-                        </div>
-                        <button class="deleteinvite btn btn-danger">Eyða boði</button>
-                </li>
-        {% endfor %}
-        </ul>
-{%endif%}
-{%if users%}
-	<h4>Notendur</h4>
-	<ul class="list-group">
-	{%for user in users%}
-		<li class="list-group-item d-flex justify-content-between align-items-start">
-			<div class="ms-2 me-auto">
-				<div class ="fw-bold"><a href="users/{{user.id}}" class="userlink" >{{user.first_name}} {{user.last_name}}</a></div>
-				<span class="badge {%if user.debt >= 0 %}bg-success{%else%}bg-danger{%endif%}">{{user.debt}}</span>
-			</div>
-                        <div class="form-check form-switch align-self-center form-floating me-3">
-                                <form method="post">
-                                {% csrf_token %}
-                                        <input name="userid" value="{{user.id}}" hidden>
-                                        <label class="form-check-label" for="isactive">{%if user.is_active%}Virkur{%else%}Óvirkur{%endif%}</label>
-                                        <input class="form-check-input form-control" type="checkbox" id="isactive" name="isactive" onchange="changeStatus(event,this)" value={%if user.is_active%}"True" checked{%else%}"False"{%endif%}>
-                                </form>
-                        </div>
-			<button class="newpayment btn btn-success align-self-center" onClick="newPayment(event,'{{user.first_name}}','{{user.last_name}}',{{user.id}},{{user.debt}})">Skrá innborgun</button>
-		</li>
-	{% endfor %}
-	</ul>
-	<div id="userpaymentpopup" class="modal fade" role="dialog">
-		<div class="modal-dialog modal-lg">
-                        <div class="modal-content">
-                                <div class="modal-body">
-					<h3 id="payername"></h3>
-                                        <form id="newpayment" method="post" action="newpayment" enctype="multipart/form-data">
-                                        {%csrf_token%}
-                                        <div class="input-group mb-3">
-                                                <input type="number" id="amount" name="amount" value= "" aria-label="Upphæð" class="form-control" required>
-						<span class="input-group-text">Kr.</span>
-                                        </div>
-                                        <div class="modal-footer">
-						<input type="hidden" id="previous_page" name="previous_page" value="/users">
-						<button type="submit" id="payerid" class="btn btn-success" name="payerid" value="">Skrá innborgun</button>
-                                                <button type="button" class="btn btn-warning" name="dismiss" data-bs-dismiss="modal">Hætta við</button>
-					</div>
-                                        </form>
-                                </div>
-                        </div>
-                </div>
-	</div>
-        <div id="invitepopup" class="modal fade" role="dialog">
-                <div class="modal-dialog modal-lg">
-                        <div class="modal-content">
-                                <div class="modal-body">
-                                        <h3 id="invite">Bjóða nýjum notanda</h3>
-                                        <form id="newinvite" method="post" action="newinvite" enctype="multipart/form-data">
-                                        {%csrf_token%}
-                                        <div class="input-group mb-3">
-                                                <input type="email" id="email" name="email" aria-label="Notandi" class="form-control" required>
-                                        </div>
-                                        <div class="modal-footer">
-						<button type="submit" class="btn btn-success">Skrá notanda</button>
-                                                <button type="button" class="btn btn-warning" name="dismiss" data-bs-dismiss="modal">Hætta við</button>
-					</div>
-					</form>
-                                </div>
-                        </div>
-                </div>
-        </div>
-{% endif %}
-{%endblock%}
+<div class="d-flex justify-content-between align-items-center mb-4">
+	<h3 class="mb-0">Notendur</h3>
+	<button class="btn btn-danger" onClick="newInvite(event)"><i class="bi bi-person-plus"></i> Bjóða notanda</button>
+</div>
 
+{%if invites%}
+<div class="card mb-4">
+	<div class="card-body">
+		<h6 class="text-muted mb-3"><i class="bi bi-envelope"></i> Boðnir notendur</h6>
+		<table class="table table-sm mb-0">
+			<thead>
+				<tr>
+					<th>Netfang</th>
+					<th>Sent</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				{%for invite in invites%}
+				<tr>
+					<td class="align-middle">{{invite.invited}}</td>
+					<td class="align-middle"><small class="text-muted">{{invite.timeout|date:"d.m.y H:i"}}</small></td>
+					<td class="align-middle text-end">
+						<form method="post" action="deleteinvite" class="d-inline">
+							{%csrf_token%}
+							<button type="submit" name="inviteid" value="{{invite.id}}" class="btn btn-outline-danger btn-sm">
+								<i class="bi bi-trash"></i> Eyða boði
+							</button>
+						</form>
+					</td>
+				</tr>
+				{%endfor%}
+			</tbody>
+		</table>
+	</div>
+</div>
+{%endif%}
+
+<!-- Tabs: Notendur / Sölutæki -->
+<ul class="nav nav-tabs mb-3" role="tablist">
+	<li class="nav-item" role="presentation">
+		<button class="nav-link active" id="persons-tab" data-bs-toggle="tab" data-bs-target="#persons-panel" type="button" role="tab">Notendur</button>
+	</li>
+	<li class="nav-item" role="presentation">
+		<button class="nav-link" id="vendors-tab" data-bs-toggle="tab" data-bs-target="#vendors-panel" type="button" role="tab">Sölutæki</button>
+	</li>
+</ul>
+
+<div class="tab-content">
+	<!-- Persons tab -->
+	<div class="tab-pane fade show active" id="persons-panel" role="tabpanel">
+		{%if users%}
+		<div class="card">
+			<div class="card-body p-0">
+				<table class="table table-sm mb-0">
+					<thead>
+						<tr>
+							<th></th>
+							<th>Nafn</th>
+							<th class="text-end">Staða</th>
+							<th class="text-center">Virkur</th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						{%for user in users%}
+						<tr class="{%if not user.is_active%}opacity-50{%endif%}">
+							<td style="width:48px;">
+								{%if user.avatar_url%}
+								<img src="{{user.avatar_url}}" class="rounded-circle" style="width:36px; height:36px; object-fit:cover;" alt="{{user.first_name}}">
+								{%else%}
+								<div class="rounded-circle d-flex align-items-center justify-content-center" style="width:36px; height:36px; background:linear-gradient(135deg, var(--kha-red), var(--kha-red-dark)); color:white; font-weight:700; font-size:0.75rem;">
+									{{user.initials}}
+								</div>
+								{%endif%}
+							</td>
+							<td class="align-middle">
+								<a href="users/{{user.id}}" class="userlink fw-bold">{{user.first_name}} {{user.last_name}}</a>
+							</td>
+							<td class="align-middle text-end">
+								<span class="badge {%if user.debt >= 0 %}bg-success{%else%}bg-danger{%endif%}">
+									{{user.debt|isk}} kr.
+								</span>
+							</td>
+							<td class="align-middle text-center">
+								<form method="post" class="d-inline">
+									{% csrf_token %}
+									<input name="userid" value="{{user.id}}" hidden>
+									<div class="form-check form-switch d-inline-block">
+										<input class="form-check-input" type="checkbox" onchange="changeStatus(event,this)" {%if user.is_active%}checked{%endif%}>
+									</div>
+								</form>
+							</td>
+							<td class="align-middle">
+								<button class="btn btn-success btn-sm" onClick="newPayment(event,'{{user.first_name}}','{{user.last_name}}',{{user.id}},{{user.debt}})">
+									<i class="bi bi-wallet2"></i>
+								</button>
+							</td>
+						</tr>
+						{%endfor%}
+					</tbody>
+				</table>
+			</div>
+		</div>
+		{%endif%}
+	</div>
+
+	<!-- Vendors tab -->
+	<div class="tab-pane fade" id="vendors-panel" role="tabpanel">
+		{%if vendors%}
+		<div class="card">
+			<div class="card-body p-0">
+				<table class="table table-sm mb-0">
+					<thead>
+						<tr>
+							<th>Notandanafn</th>
+							<th>Nafn</th>
+							<th class="text-center">Virkur</th>
+						</tr>
+					</thead>
+					<tbody>
+						{%for v in vendors%}
+						<tr class="{%if not v.is_active%}opacity-50{%endif%}">
+							<td class="align-middle">{{v.username}}</td>
+							<td class="align-middle">{{v.first_name}} {{v.last_name}}</td>
+							<td class="align-middle text-center">
+								<form method="post" class="d-inline">
+									{% csrf_token %}
+									<input name="userid" value="{{v.id}}" hidden>
+									<div class="form-check form-switch d-inline-block">
+										<input class="form-check-input" type="checkbox" onchange="changeStatus(event,this)" {%if v.is_active%}checked{%endif%}>
+									</div>
+								</form>
+							</td>
+						</tr>
+						{%endfor%}
+					</tbody>
+				</table>
+			</div>
+		</div>
+		{%else%}
+		<div class="alert alert-info">Engin sölutæki skráð.</div>
+		{%endif%}
+	</div>
+</div>
+
+<!-- Payment modal -->
+<div id="userpaymentpopup" class="modal fade" role="dialog">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="payername"></h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+			</div>
+			<div class="modal-body">
+				<form id="newpayment" method="post" action="newpayment">
+				{%csrf_token%}
+				<div class="input-group mb-3">
+					<input type="number" id="amount" name="amount" value="" aria-label="Upphæð" class="form-control" required>
+					<span class="input-group-text">Kr.</span>
+				</div>
+				<div class="d-flex justify-content-between">
+					<input type="hidden" id="previous_page" name="previous_page" value="/users">
+					<button type="submit" id="payerid" class="btn btn-success" name="payerid" value=""><i class="bi bi-check-lg"></i> Skrá innborgun</button>
+					<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hætta við</button>
+				</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Invite modal -->
+<div id="invitepopup" class="modal fade" role="dialog">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Bjóða nýjum notanda</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+			</div>
+			<div class="modal-body">
+				<form id="newinvite" method="post" action="newinvite">
+				{%csrf_token%}
+				<div class="input-group mb-3">
+					<span class="input-group-text"><i class="bi bi-envelope"></i></span>
+					<input type="email" id="email" name="email" aria-label="Netfang" class="form-control" placeholder="netfang@unak.is" required>
+				</div>
+				<div class="d-flex justify-content-between">
+					<button type="submit" class="btn btn-success"><i class="bi bi-send"></i> Senda boð</button>
+					<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hætta við</button>
+				</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+{%endblock%}

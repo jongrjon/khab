@@ -1,0 +1,81 @@
+# Production stack for KHA Boutique — /srv/khab on the dev box.
+#
+# Differs from docker-compose.yml (local dev) in three ways that matter:
+#   1. app publishes on 127.0.0.1 only — host nginx is the sole client
+#   2. db publishes NO host port at all — reachable only on the docker network
+#   3. POSTGRES_PASSWORD is required, not defaulted to "khab"
+#
+# Bring up:  ./scripts/init-server.sh --with-nginx   (once)
+# Update:    ./scripts/deploy.sh
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    ports:
+      # Loopback only. Exposing 0.0.0.0:8000 would bypass nginx entirely.
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - ./media:/app/media
+      - ./staticfiles:/app/staticfiles
+      # One-time SQLite import lives here. Empty in steady state; the
+      # entrypoint only looks at it when the Postgres user table is empty.
+      - ./legacy:/app/legacy:ro
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgres://khab:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}@db:5432/khab
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      # Sends the site's real hostname (first ALLOWED_HOSTS entry) as the Host
+      # header instead of "localhost". Hitting loopback by name makes Django
+      # return 400 Invalid HTTP_HOST unless localhost is in ALLOWED_HOSTS,
+      # which both hides a genuinely broken ALLOWED_HOSTS (container reports
+      # healthy while every real request 400s) and forces loopback entries
+      # into production config.
+      test: ["CMD", "python", "-c", "import os, urllib.request as u; host = next((h.strip() for h in os.environ.get('ALLOWED_HOSTS', '').split(',') if h.strip()), 'localhost'); u.urlopen(u.Request('http://127.0.0.1:8000/login/', headers={'Host': host}))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: khab
+      POSTGRES_USER: khab
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}
+    # No ports: — the database is not reachable from the host network.
+    # For psql access: docker compose -f docker-compose.prod.yaml exec db psql -U khab
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U khab -d khab"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  backup:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    volumes:
+      - ./scripts:/scripts:ro
+      - backup_data:/backups
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_DB: khab
+      POSTGRES_USER: khab
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}
+      BACKUP_DIR: /backups
+      BACKUP_RETENTION: 30
+    entrypoint: ["/bin/sh", "-c", "while true; do /scripts/backup.sh; sleep 86400; done"]
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  backup_data:

@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="is">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	{%load static%}
+	<link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
+	<link rel="icon" type="image/png" sizes="32x32" href="{% static 'favicon-32.png' %}">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+	<link href="{% static 'css/boutique.css' %}" rel="stylesheet">
+	<link href="{% static 'css/vendor.css' %}" rel="stylesheet">
+	<title>KHA Boutique</title>
+</head>
+<body class="vendor-body">
+	<script src="{% static 'js/bootstrap.bundle.min.js'%}"></script>
+
+	<!-- Purchase toast -->
+	<div class="position-fixed top-0 start-50 translate-middle-x p-3" style="z-index:1100;">
+		<div id="purchaseToast" class="toast align-items-center border-0 text-white bg-success" role="alert">
+			<div class="d-flex">
+				<div class="toast-body fs-5"><i class="bi bi-check-circle me-2"></i><span id="toastMessage"></span></div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+	document.addEventListener('DOMContentLoaded', function() {
+		var params = new URLSearchParams(window.location.search);
+		var msg = params.get('msg');
+		if (msg) {
+			document.getElementById('toastMessage').textContent = msg;
+			var toast = new bootstrap.Toast(document.getElementById('purchaseToast'), {delay: 5000});
+			toast.show();
+			history.replaceState(null, '', '/vendor/');
+		}
+		// Stagger animation
+		document.querySelectorAll('.vendor-user-card').forEach(function(card, i) {
+			card.style.animationDelay = (i * 40) + 'ms';
+		});
+	});
+	</script>
+
+	<div class="container-fluid">
+		<div class="text-center vendor-splash-header">
+			<h1 class="vendor-logo">KHA Boutique</h1>
+			<p class="vendor-splash-subtitle">Veldu notanda</p>
+		</div>
+		<div class="row row-cols-2 row-cols-md-3 row-cols-lg-5 g-3 px-3 pb-4">
+			{%for user in users%}
+			<div class="col">
+				<a href="/vendor/shop/{{user.id}}/" class="vendor-user-link">
+					<div class="card vendor-user-card text-center">
+						{%if user.avatar_url%}
+						<img src="{{user.avatar_url}}" class="vendor-avatar mx-auto mt-2" alt="{{user.first_name}}">
+						{%else%}
+						<div class="vendor-avatar-placeholder mx-auto mt-2">
+							<span>{{user.first_name|first}}{{user.last_name|first}}</span>
+						</div>
+						{%endif%}
+						<div class="card-body py-2">
+							<p class="card-text vendor-username">{{user.first_name}}</p>
+						</div>
+					</div>
+				</a>
+			</div>
+			{%endfor%}
+		</div>
+	</div>
+</body>
+</html>

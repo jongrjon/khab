@@ -46,11 +46,10 @@ function editPayment(e, fn, ln, pid, amnt){
 	$("#editpaymentpopup").modal("show");
 };
 
-//event,'{{sale.buyer.first_name}}','{{sale.buyer.last_name}}',{{sale.id}},{{sale.price}},'{{sale.product.name|default_if_none:'Vara hætt'}}')
-function editSale(e, fn, ln, sid, amnt, pn){
+function editSale(e, fn, ln, sid, amnt, pid){
 	e.preventDefault();
 	$("#editbuyername").text(fn+" "+ln);
-	$("#editproduct").val(pn)
+	$("#editproduct").val(pid || '');
 	$("#editamount").val(amnt);
 	$("#saleid").val(sid);
 	$("#deletesaleid").val(sid)

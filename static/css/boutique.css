@@ -1,48 +1,410 @@
-header{
-	background-color:#a52417;
+/* ========================================
+   KHA Boutique — Design System
+   Primary: #a52417 | Font: Inter
+   ======================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+    --kha-red: #a52417;
+    --kha-red-dark: #7a1b11;
+    --kha-red-light: #fdf2f1;
+    --kha-red-glow: rgba(165, 36, 23, 0.15);
+    --kha-bg: #fafafa;
+    --kha-card-bg: #ffffff;
+    --kha-text: #1a1a1a;
+    --kha-text-muted: #6b7280;
+    --kha-border: #e5e7eb;
+    --kha-shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+    --kha-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    --kha-shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+    --kha-radius: 12px;
+    --kha-radius-sm: 8px;
+    --kha-radius-lg: 16px;
+    --kha-transition: 180ms ease;
 }
 
-.thumbnail{
-	/*max-width:150px;
-	max-height:150px;*/
-	aspect-ratio:1;
-	object-fit: cover;
+/* --- Global --- */
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: var(--kha-bg);
+    color: var(--kha-text);
+    -webkit-font-smoothing: antialiased;
 }
 
-.editpreview{
-	max-width:200px;
-	max-height:200px;
-	aspect-ratio:1;
-	object-fit: cover;
+/* Kill Bootstrap blue defaults */
+a {
+    color: var(--kha-red);
 }
 
-.userlink{
-	color:#000;
-	text-decoration:none;
+a:hover {
+    color: var(--kha-red-dark);
 }
 
-.userlink:hover{
-	color:#a52417;
+/* --- Header / Navbar --- */
+header {
+    background: linear-gradient(135deg, var(--kha-red) 0%, var(--kha-red-dark) 100%);
 }
 
-.form-check-input{
-    background-color: #dc3545;
-    border-color: #dc3545;
+.navbar {
+    padding: 0.6rem 1rem;
 }
-.form-check-input:checked{
-    background-color: #198754;
-    border-color: #198754;
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.3rem;
+    letter-spacing: -0.02em;
+}
+
+.nav-link {
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: opacity var(--kha-transition);
+}
+
+.nav-link:hover {
+    opacity: 0.85;
+}
+
+/* --- Cards --- */
+.card {
+    border: none;
+    border-radius: var(--kha-radius);
+    box-shadow: var(--kha-shadow-sm);
+    transition: transform var(--kha-transition), box-shadow var(--kha-transition);
+    overflow: hidden;
+    background: var(--kha-card-bg);
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--kha-shadow);
 }
 
 .card-body {
     flex: 1 1 auto;
-    padding: 0rem 1rem 1rem;
+    padding: 0.75rem 1rem 1rem;
 }
 
-.card-title{
+.card-title {
+    font-weight: 600;
+    font-size: 0.9rem;
     white-space: normal;
     height: auto;
     min-height: 2.5rem;
     max-height: 2.5rem;
-    line-height: 1.5rem;
+    line-height: 1.4;
+    color: var(--kha-text);
+}
+
+/* --- Product images --- */
+.thumbnail {
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 0;
+}
+
+.editpreview {
+    max-width: 200px;
+    max-height: 200px;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: var(--kha-radius-sm);
+}
+
+/* --- Buttons --- */
+.btn {
+    font-weight: 500;
+    border-radius: var(--kha-radius-sm);
+    transition: all var(--kha-transition);
+    font-size: 0.875rem;
+}
+
+.btn-danger {
+    background: var(--kha-red);
+    border-color: var(--kha-red);
+}
+
+.btn-danger:hover {
+    background: var(--kha-red-dark);
+    border-color: var(--kha-red-dark);
+}
+
+.btn-outline-danger {
+    color: var(--kha-red);
+    border-color: var(--kha-red);
+}
+
+.btn-outline-danger:hover {
+    background: var(--kha-red);
+    border-color: var(--kha-red);
+}
+
+.btn-warning {
+    font-weight: 600;
+}
+
+.btn-primary {
+    background: var(--kha-red);
+    border-color: var(--kha-red);
+}
+
+.btn-primary:hover {
+    background: var(--kha-red-dark);
+    border-color: var(--kha-red-dark);
+}
+
+/* --- Tables --- */
+.table {
+    border-radius: var(--kha-radius-sm);
+    overflow: hidden;
+    font-size: 0.875rem;
+}
+
+.table thead th {
+    background: var(--kha-red-light);
+    color: var(--kha-red-dark);
+    font-weight: 600;
+    border-bottom: 2px solid var(--kha-red);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    padding: 0.6rem 0.75rem;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.table tbody tr {
+    transition: background var(--kha-transition);
+}
+
+.table tbody tr:hover {
+    background: var(--kha-red-light) !important;
+    cursor: pointer;
+}
+
+.table td, .table th {
+    padding: 0.5rem 0.75rem;
+    vertical-align: middle;
+}
+
+/* --- Modals --- */
+.modal-content {
+    border: none;
+    border-radius: var(--kha-radius-lg);
+    box-shadow: var(--kha-shadow-lg);
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--kha-border);
+    padding: 1rem 1.25rem;
+}
+
+.modal-footer {
+    border-top: 1px solid var(--kha-border);
+    padding: 0.75rem 1.25rem;
+}
+
+/* --- Forms --- */
+.form-control {
+    border-radius: var(--kha-radius-sm);
+    border-color: var(--kha-border);
+    font-size: 0.9rem;
+    transition: border-color var(--kha-transition), box-shadow var(--kha-transition);
+}
+
+.form-control:focus {
+    border-color: var(--kha-red);
+    box-shadow: 0 0 0 3px var(--kha-red-glow);
+}
+
+.input-group-text {
+    border-radius: var(--kha-radius-sm);
+    background: var(--kha-red-light);
+    border-color: var(--kha-border);
+    font-weight: 500;
+    font-size: 0.875rem;
+}
+
+/* --- Form switches --- */
+.form-check-input {
+    background-color: var(--kha-text-muted);
+    border-color: var(--kha-text-muted);
+}
+
+.form-check-input:checked {
+    background-color: var(--kha-red);
+    border-color: var(--kha-red);
+}
+
+.form-check-input:focus {
+    box-shadow: 0 0 0 3px var(--kha-red-glow);
+}
+
+/* --- Badges --- */
+.badge {
+    font-weight: 600;
+    border-radius: 6px;
+    font-size: 0.8rem;
+}
+
+/* --- Pagination --- */
+.page-link {
+    color: var(--kha-red);
+    border-color: var(--kha-border);
+    border-radius: var(--kha-radius-sm);
+    font-weight: 500;
+}
+
+.page-link:hover {
+    color: white;
+    background: var(--kha-red);
+    border-color: var(--kha-red);
+}
+
+.page-item.active .page-link {
+    background: var(--kha-red);
+    border-color: var(--kha-red);
+}
+
+/* --- Nav tabs (products page) --- */
+.nav-tabs {
+    border-bottom: 2px solid var(--kha-border);
+}
+
+.nav-tabs .nav-link {
+    font-weight: 600;
+    color: var(--kha-text-muted);
+    border: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    padding: 0.6rem 1.2rem;
+    transition: all var(--kha-transition);
+}
+
+.nav-tabs .nav-link:hover {
+    color: var(--kha-red);
+    border-bottom-color: var(--kha-red-glow);
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--kha-red);
+    border-bottom-color: var(--kha-red);
+    background: transparent;
+}
+
+/* --- List groups (users page) --- */
+.list-group-item {
+    border-color: var(--kha-border);
+    padding: 0.75rem 1rem;
+    transition: background var(--kha-transition);
+}
+
+.list-group-item:hover {
+    background: var(--kha-red-light);
+}
+
+/* --- Progress bars (scoreboard) --- */
+.progress {
+    height: 1.5rem;
+    border-radius: var(--kha-radius-sm);
+    background: var(--kha-border);
+    overflow: hidden;
+}
+
+.progress-bar {
+    background: linear-gradient(90deg, var(--kha-red) 0%, var(--kha-red-dark) 100%);
+    font-weight: 600;
+    font-size: 0.8rem;
+    transition: width 0.6s ease;
+}
+
+.progress-bar.bg-danger {
+    background: linear-gradient(90deg, #ef4444 0%, var(--kha-red) 100%) !important;
+}
+
+/* --- Links --- */
+.userlink {
+    color: var(--kha-text);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color var(--kha-transition);
+}
+
+.userlink:hover {
+    color: var(--kha-red);
+}
+
+/* --- Alerts --- */
+.alert {
+    border: none;
+    border-radius: var(--kha-radius-sm);
+    font-weight: 500;
+}
+
+/* --- Utility: Animate in --- */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-in {
+    animation: fadeInUp 0.35s ease both;
+}
+
+/* Staggered animation for grids */
+.row > .col:nth-child(1) { animation-delay: 0ms; }
+.row > .col:nth-child(2) { animation-delay: 30ms; }
+.row > .col:nth-child(3) { animation-delay: 60ms; }
+.row > .col:nth-child(4) { animation-delay: 90ms; }
+.row > .col:nth-child(5) { animation-delay: 120ms; }
+.row > .col:nth-child(6) { animation-delay: 150ms; }
+
+/* --- Offer banner --- */
+.product-img-wrap {
+    position: relative;
+    overflow: hidden;
+}
+
+.offer-banner {
+    position: absolute;
+    top: 24px;
+    left: -45px;
+    width: 180px;
+    text-align: center;
+    padding: 7px 0;
+    background: var(--kha-red);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.9rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transform: rotate(-35deg);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    z-index: 2;
+}
+
+.product-price-area {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.offer-price-original {
+    text-decoration: line-through;
+    color: var(--kha-text-muted);
+    font-size: 0.8em;
+}
+
+.offer-price-current {
+    color: var(--kha-red);
+    font-weight: 700;
 }

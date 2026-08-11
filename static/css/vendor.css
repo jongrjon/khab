@@ -1,0 +1,355 @@
+/* ========================================
+   Vendor Kiosk — Tablet-First Design
+   Built on boutique.css design system
+   Min target: 768px tablet (iPad)
+   ======================================== */
+
+/* --- Base: Tablet-first defaults --- */
+.vendor-body {
+    background: linear-gradient(160deg, #faf8f7 0%, #f0ecea 100%);
+    overflow-x: hidden;
+    min-height: 100vh;
+}
+
+.vendor-logo {
+    color: var(--kha-red);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    font-size: 1.6rem;
+}
+
+/* --- Splash screen --- */
+.vendor-splash-header {
+    padding: 2.5rem 1rem 1.5rem;
+}
+
+.vendor-splash-header h1 {
+    font-size: 2.2rem;
+}
+
+.vendor-splash-subtitle {
+    color: var(--kha-text-muted);
+    font-weight: 500;
+    font-size: 1rem;
+    margin-top: 0.25rem;
+}
+
+.vendor-user-card {
+    cursor: pointer;
+    transition: transform 150ms ease, box-shadow 150ms ease;
+    border: none;
+    border-radius: var(--kha-radius-lg);
+    background: white;
+    box-shadow: var(--kha-shadow-sm);
+    padding: 1.2rem 0.5rem;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.vendor-user-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--kha-shadow-lg);
+}
+
+.vendor-user-card:active {
+    opacity: 0.8;
+    transition: opacity 0ms;
+}
+
+.vendor-avatar {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border: 3px solid white;
+    transition: transform 150ms ease;
+}
+
+.vendor-user-card:hover .vendor-avatar,
+.vendor-user-card:hover .vendor-avatar-placeholder {
+    transform: scale(1.06);
+}
+
+.vendor-avatar-placeholder {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--kha-red) 0%, var(--kha-red-dark) 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(165, 36, 23, 0.25);
+    border: 3px solid white;
+    transition: transform 150ms ease;
+}
+
+.vendor-username {
+    font-weight: 600;
+    color: var(--kha-text);
+    font-size: 1rem;
+    margin: 0;
+    line-height: 1.3;
+}
+
+/* Splash link reset — kill Bootstrap blue */
+a.vendor-user-link {
+    color: inherit;
+    text-decoration: none;
+}
+
+a.vendor-user-link:hover {
+    color: inherit;
+}
+
+/* Stagger animation */
+.vendor-user-card {
+    animation: fadeInUp 0.35s ease both;
+}
+
+/* --- Top bar --- */
+.vendor-topbar {
+    background: linear-gradient(135deg, var(--kha-red) 0%, var(--kha-red-dark) 100%);
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 1060;
+    box-shadow: 0 2px 12px rgba(165, 36, 23, 0.3);
+    padding: 0.5rem 1rem;
+}
+
+.vendor-topbar .vendor-logo {
+    color: white;
+    font-size: 1.4rem;
+}
+
+.vendor-topbar-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255,255,255,0.5);
+}
+
+.vendor-topbar-avatar-placeholder {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(4px);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.vendor-buyer-name {
+    font-size: 1.15rem;
+    font-weight: 600;
+}
+
+.vendor-exit-btn {
+    font-size: 1.5rem;
+    line-height: 1;
+    border-width: 2px;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 150ms ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.vendor-exit-btn:hover {
+    background: rgba(255,255,255,0.15);
+    transform: scale(1.08);
+}
+
+/* --- Product cards (vendor) --- */
+.vendor-product-card {
+    height: 100%;
+    border: none;
+    border-radius: var(--kha-radius);
+    background: white;
+    box-shadow: var(--kha-shadow-sm);
+    transition: transform 150ms ease, box-shadow 150ms ease;
+    animation: fadeInUp 0.3s ease both;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.vendor-product-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--kha-shadow-lg);
+}
+
+.vendor-product-card .thumbnail {
+    border-radius: var(--kha-radius) var(--kha-radius) 0 0;
+}
+
+.vendor-product-name {
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.3;
+    min-height: 2.4rem;
+    color: var(--kha-text);
+}
+
+.vendor-product-price {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--kha-red);
+    background: var(--kha-red-light);
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+}
+
+/* Vendor product buttons — tablet-sized touch targets */
+.vendor-product-card .btn {
+    font-size: 0.9rem;
+    padding: 0.5rem 0.4rem;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+    transition: opacity 100ms ease, transform 100ms ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.vendor-product-card .btn:active {
+    opacity: 0.7;
+    transition: none;
+}
+
+/* --- Cart bar (fixed bottom) --- */
+.vendor-cart-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, var(--kha-red) 0%, var(--kha-red-dark) 100%);
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 -4px 20px rgba(165, 36, 23, 0.3);
+    z-index: 1000;
+    transition: all 150ms ease;
+    animation: slideUp 0.3s ease;
+    -webkit-tap-highlight-color: transparent;
+    padding: 0.6rem 0;
+}
+
+.vendor-cart-bar:hover {
+    filter: brightness(0.9);
+}
+
+.vendor-cart-bar:active {
+    filter: brightness(0.85);
+}
+
+@keyframes slideUp {
+    from { transform: translateY(100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* Cart count bounce */
+@keyframes bounceIn {
+    0% { transform: scale(0.7); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.cart-count-bounce {
+    animation: bounceIn 0.25s ease;
+}
+
+/* --- Cart modal --- */
+.vendor-cart-item {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--kha-border);
+}
+
+.vendor-cart-item:last-child {
+    border-bottom: none;
+}
+
+/* Cart modal quantity buttons — tablet-sized */
+#cartItems .btn-sm {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    padding: 0;
+}
+
+/* --- Toast --- */
+.toast {
+    border-radius: var(--kha-radius);
+    box-shadow: var(--kha-shadow-lg);
+    font-weight: 500;
+}
+
+/* --- Responsive: Small phones --- */
+@media (max-width: 575.98px) {
+    .vendor-splash-header {
+        padding: 1.5rem 0.5rem 1rem;
+    }
+
+    .vendor-splash-header h1 {
+        font-size: 1.6rem;
+    }
+
+    .vendor-avatar,
+    .vendor-avatar-placeholder {
+        width: 72px;
+        height: 72px;
+        font-size: 1.4rem;
+    }
+
+    .vendor-username {
+        font-size: 0.85rem;
+    }
+
+    .vendor-user-card {
+        padding: 0.8rem 0.3rem;
+    }
+
+    .vendor-buyer-name {
+        font-size: 0.95rem;
+    }
+
+    .vendor-product-name {
+        font-size: 0.8rem;
+        min-height: 2rem;
+    }
+}
+
+/* --- Responsive: Large tablets & desktops --- */
+@media (min-width: 992px) {
+    .vendor-avatar,
+    .vendor-avatar-placeholder {
+        width: 110px;
+        height: 110px;
+        font-size: 2rem;
+    }
+
+    .vendor-splash-header h1 {
+        font-size: 2.6rem;
+    }
+
+    .vendor-username {
+        font-size: 1.1rem;
+    }
+
+    .vendor-user-card {
+        padding: 1.5rem 0.5rem;
+    }
+}

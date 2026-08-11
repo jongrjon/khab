@@ -1,0 +1,55 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: khab
+      POSTGRES_USER: khab
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-khab}
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U khab"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./media:/app/media
+      - ./staticfiles:/app/staticfiles
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgres://khab:${POSTGRES_PASSWORD:-khab}@db:5432/khab
+    depends_on:
+      db:
+        condition: service_healthy
+
+  backup:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    volumes:
+      - ./scripts:/scripts:ro
+      - backup_data:/backups
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_DB: khab
+      POSTGRES_USER: khab
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-khab}
+      BACKUP_DIR: /backups
+      BACKUP_RETENTION: 30
+    entrypoint: ["/bin/sh", "-c", "while true; do /scripts/backup.sh; sleep 86400; done"]
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  backup_data:
