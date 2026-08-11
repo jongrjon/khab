@@ -172,13 +172,13 @@ $C exec backup ls /backups
                     │   host nginx    │  /static/ → /srv/khab/staticfiles/
                     │                 │  /media/  → /srv/khab/media/
                     └────────┬────────┘  /stofur, /examdata → unchanged, being retired
-                             │ proxy_pass 127.0.0.1:8000
+                             │ proxy_pass 127.0.0.1:$APP_PORT
    ╔═════════════════════════▼═══════════════════════════╗
    ║  /srv/khab   docker compose -f docker-compose.prod   ║
    ║                                                      ║
    ║   app ──────────────▶ db ◀────────── backup          ║
    ║   gunicorn ×3         postgres 16     daily pg_dump  ║
-   ║   127.0.0.1:8000      no host port    30-day keep    ║
+   ║   127.0.0.1:$APP_PORT   no host port    30-day keep    ║
    ╚══════════════════════════════════════════════════════╝
         │                    │                  │
     ./media              postgres_data      backup_data
@@ -187,7 +187,7 @@ $C exec backup ls /backups
 
 Deliberate choices:
 
-- **`app` publishes on `127.0.0.1:8000`**, not `0.0.0.0`. nginx is the only
+- **`app` publishes on `127.0.0.1:$APP_PORT`** (`APP_PORT` in `.env`, default 8000), not `0.0.0.0`. nginx is the only
   client; there is no way to reach gunicorn from off-box.
 - **`db` publishes no host port at all.** Use `exec db psql` to get in.
 - **The healthcheck sends the real hostname** as its `Host` header rather than

@@ -65,7 +65,25 @@ SECRET_LEN="$(sed -n 's/^SECRET_KEY=//p' .env | head -1 | wc -c)"
 # header, and the one to verify against. No hostname exists — this is an IP.
 PRIMARY_HOST="$(sed -n 's/^ALLOWED_HOSTS=//p' .env | head -1 | cut -d, -f1)"
 [ -n "$PRIMARY_HOST" ] || die "ALLOWED_HOSTS is empty in .env — run prepare-server.sh."
-ok ".env present (primary host: $PRIMARY_HOST)."
+
+# Host port gunicorn is published on. This box runs other apps, so 8000 is not
+# guaranteed free. Compose and the nginx site both derive from this value.
+APP_PORT="$(sed -n 's/^APP_PORT=//p' .env | head -1)"
+APP_PORT="${APP_PORT:-8000}"
+export APP_PORT
+ok ".env present (primary host: $PRIMARY_HOST, app port: $APP_PORT)."
+
+# Fail early and legibly. Docker's own error for this is a wall of text about
+# "failed to bind host port" that reads like a Docker fault rather than
+# "another program already owns this port".
+if ! docker compose -f "$COMPOSE_FILE" ps --status running --quiet app 2>/dev/null | grep -q .; then
+  if ss -ltn 2>/dev/null | grep -qE "[:.]${APP_PORT}[[:space:]]"; then
+    warn "Something is already listening on port $APP_PORT:"
+    sudo ss -ltnp 2>/dev/null | grep -E "[:.]${APP_PORT}[[:space:]]" || true
+    die "Pick a free port: add APP_PORT=<port> to .env and re-run.
+     The nginx proxy_pass is rendered from the same value, so both stay in sync."
+  fi
+fi
 
 # ── 3. Bind-mount dirs (avoid root-owned auto-created dirs) ──────────────────
 mkdir -p media staticfiles legacy
@@ -135,14 +153,22 @@ done
 # ── 9. Optional host nginx site ──────────────────────────────────────────────
 if [ "$WITH_NGINX" -eq 1 ]; then
   SITE=/etc/nginx/sites-available/khab
-  if [ -f "$SITE" ] && ! cmp -s nginx/khab.nginx.conf "$SITE"; then
+  # Render __APP_PORT__ so the proxy_pass always matches the port compose
+  # actually published. Hand-editing two files that must agree is how you get
+  # a 502 that looks like an application fault.
+  RENDERED="$(mktemp)"
+  sed "s/__APP_PORT__/${APP_PORT}/g" nginx/khab.nginx.conf > "$RENDERED"
+  grep -q '__APP_PORT__' "$RENDERED" && die "Failed to substitute APP_PORT into the nginx site."
+
+  if [ -f "$SITE" ] && ! cmp -s "$RENDERED" "$SITE"; then
     BACKUP="${SITE}.pre-docker.$(date +%Y%m%d_%H%M%S)"
     log "Backing up existing site to $BACKUP ..."
     sudo cp "$SITE" "$BACKUP"
     ok "Backup saved (contains the /stofur and /examdata blocks as they were)."
   fi
-  log "Installing host nginx site..."
-  sudo cp nginx/khab.nginx.conf "$SITE"
+  log "Installing host nginx site (proxy_pass -> 127.0.0.1:${APP_PORT})..."
+  sudo cp "$RENDERED" "$SITE"
+  rm -f "$RENDERED"
   sudo ln -sf "$SITE" /etc/nginx/sites-enabled/khab
   if sudo nginx -t; then
     sudo systemctl reload nginx
@@ -169,7 +195,7 @@ Next steps:
   • Verify from ANOTHER machine — that is the path users take and it is what
     catches an address missing from ALLOWED_HOSTS.
   • Verify directly:       curl -s -o /dev/null -w '%{http_code}\\n' \\
-                             -H 'Host: $PRIMARY_HOST' http://127.0.0.1:8000/login/
+                             -H 'Host: $PRIMARY_HOST' http://127.0.0.1:$APP_PORT/login/
   • Log in and check /dashboard, /users, /sales, /scoreboard
   • If data was imported, confirm the counts, then: rm -rf legacy/
   • Retire the old gunicorn unit (see warning above, if any)

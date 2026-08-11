@@ -12,8 +12,11 @@ services:
     build: .
     restart: unless-stopped
     ports:
-      # Loopback only. Exposing 0.0.0.0:8000 would bypass nginx entirely.
-      - "127.0.0.1:8000:8000"
+      # Loopback only. Exposing 0.0.0.0 would bypass nginx entirely.
+      # The host port is configurable because this box runs other apps and
+      # 8000 was already taken. Keep APP_PORT in .env in sync with the
+      # proxy_pass in the nginx site — init-server.sh renders it from .env.
+      - "127.0.0.1:${APP_PORT:-8000}:8000"
     volumes:
       - ./media:/app/media
       - ./staticfiles:/app/staticfiles
