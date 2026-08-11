@@ -48,7 +48,18 @@ ok "docker and git present."
 # ── 2. .env ──────────────────────────────────────────────────────────────────
 [ -f .env ] || die ".env missing — run scripts/prepare-server.sh first."
 grep -q '^DEBUG=True' .env && warn "DEBUG=True in .env — this should be False in production."
-grep -q '^POSTGRES_PASSWORD=khab$' .env && die "POSTGRES_PASSWORD is still the default 'khab' — run prepare-server.sh."
+# Last line of defence: prepare-server.sh should have replaced these, but a
+# placeholder reaching production means public-repo values are securing real
+# sessions and a real database.
+for key in SECRET_KEY POSTGRES_PASSWORD; do
+  value="$(sed -n "s/^$key=//p" .env | head -1)"
+  case "${value:-}" in
+    ''|*generate-me*|*your*|*YOUR*|*change*|*CHANGE*|*example*|*insecure*|khab)
+      die "$key is still a placeholder ('${value:-empty}') — re-run scripts/prepare-server.sh." ;;
+  esac
+done
+SECRET_LEN="$(sed -n 's/^SECRET_KEY=//p' .env | head -1 | wc -c)"
+[ "$SECRET_LEN" -ge 50 ] || die "SECRET_KEY is only $((SECRET_LEN-1)) characters — re-run scripts/prepare-server.sh."
 
 # First ALLOWED_HOSTS entry: the address the healthcheck sends as its Host
 # header, and the one to verify against. No hostname exists — this is an IP.

@@ -92,6 +92,18 @@ PY
 # env_value KEY — current value in .env, empty if unset.
 env_value(){ sed -n "s/^$1=//p" .env | head -1; }
 
+# is_placeholder VALUE — true if the value is a stand-in rather than a real
+# secret. .env.example ships "generate-me"; Django's startproject emits the
+# "django-insecure-" prefix. Keep this in sync with .env.example: a placeholder
+# that is not listed here gets silently accepted as a real secret.
+is_placeholder(){
+  case "${1:-}" in
+    ''|*generate-me*|*generate_me*|*your*|*YOUR*|*change*|*CHANGE*) return 0 ;;
+    *example*|*EXAMPLE*|*insecure*|*placeholder*|*fill-me*|*TODO*)  return 0 ;;
+  esac
+  return 1
+}
+
 # ── 1. Prerequisites ─────────────────────────────────────────────────────────
 log "Checking prerequisites..."
 for bin in docker git python3; do
@@ -160,22 +172,37 @@ set_env ALLOWED_HOSTS "$HOSTS"
 ok "DEBUG=False, ALLOWED_HOSTS=$HOSTS"
 warn "If you reach the app at an address not in that list, add it: --host <addr>"
 
-if [ -z "$(env_value SECRET_KEY)" ] || env_value SECRET_KEY | grep -qi 'change\|example\|your\|insecure'; then
+# Also regenerate anything shorter than Django's own 50-character threshold —
+# rotating SECRET_KEY only invalidates existing sessions, so erring towards
+# regeneration is cheap.
+CURRENT_SECRET="$(env_value SECRET_KEY)"
+if is_placeholder "$CURRENT_SECRET" || [ "${#CURRENT_SECRET}" -lt 50 ]; then
   set_env SECRET_KEY "$(python3 -c 'import secrets; print(secrets.token_urlsafe(64))')"
   ok "SECRET_KEY generated."
 else
   ok "SECRET_KEY already set — left alone."
 fi
 
-if [ -z "$(env_value POSTGRES_PASSWORD)" ] || [ "$(env_value POSTGRES_PASSWORD)" = "khab" ]; then
+# No length check here, unlike SECRET_KEY: Postgres keeps whatever password the
+# volume was initialised with, so silently rotating this would lock the app out
+# of an existing database.
+CURRENT_PGPW="$(env_value POSTGRES_PASSWORD)"
+if is_placeholder "$CURRENT_PGPW" || [ "$CURRENT_PGPW" = "khab" ]; then
   set_env POSTGRES_PASSWORD "$(python3 -c 'import secrets; print(secrets.token_urlsafe(32))')"
   ok "POSTGRES_PASSWORD generated."
+  if docker volume ls -q 2>/dev/null | grep -qx 'khab_postgres_data'; then
+    warn "A khab_postgres_data volume already exists, and the password just changed."
+    warn "Postgres keeps the password from first init, so the app will fail to"
+    warn "authenticate. Either restore the previous value in .env, or wipe the"
+    warn "volume:  docker compose -f docker-compose.prod.yaml down -v"
+  fi
 else
   ok "POSTGRES_PASSWORD already set — left alone."
 fi
 
-# DATABASE_URL in .env is only used when running manage.py from the host.
-# docker-compose.prod.yaml overrides it for the container (host "db").
+# docker-compose.prod.yaml overrides this for the container. Kept in sync here
+# so the file is not self-contradictory; the db has no host port in prod, so
+# this URL is not reachable from the host anyway.
 set_env DATABASE_URL "postgres://khab:$(env_value POSTGRES_PASSWORD)@db:5432/khab"
 
 # ── 6. Secrets that cannot be derived ────────────────────────────────────────
@@ -197,10 +224,7 @@ fi
 
 MISSING=""
 for key in SECRET_KEY POSTGRES_PASSWORD EMAIL_HOST_USER EMAIL_HOST_PASSWORD; do
-  value="$(env_value "$key")"
-  case "$value" in
-    ''|*your*|*YOUR*|*change*|*CHANGE*|*example*) MISSING="$MISSING $key" ;;
-  esac
+  is_placeholder "$(env_value "$key")" && MISSING="$MISSING $key"
 done
 
 if [ -n "$MISSING" ]; then
