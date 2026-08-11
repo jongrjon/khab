@@ -45,7 +45,11 @@
 						<li class="nav-item"><a class="nav-link{% if request.path == '/sales' %} active" aria-current="page" {% endif %}" href="/sales"><i class="bi bi-graph-up"></i> Sölur</a></li>
 						<li class="nav-item"><a class="nav-link {% if request.path == '/scoreboard' %} active" aria-current="page" {% endif %}"  href="/scoreboard"><i class="bi bi-trophy"></i> Stöðutafla</a></li>
 					</ul>
-					<a class="btn btn-outline-light btn-sm" type="button" href="/logout"><i class="bi bi-box-arrow-right"></i> Útskrá</a>
+					{# Django 5.0 removed GET support from LogoutView, so this must be a POST. #}
+					<form action="{% url 'logout' %}" method="post" class="d-inline">
+						{% csrf_token %}
+						<button class="btn btn-outline-light btn-sm" type="submit"><i class="bi bi-box-arrow-right"></i> Útskrá</button>
+					</form>
 				</div>
 				{%endif%}
 			</div>
