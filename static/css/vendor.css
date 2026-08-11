@@ -111,8 +111,14 @@ a.vendor-user-link:hover {
 
 /* --- Top bar --- */
 .vendor-topbar {
-    background: linear-gradient(135deg, var(--kha-red) 0%, var(--kha-red-dark) 100%);
-    color: white;
+    /* Solid colour FIRST, gradient layered on top. A tablet running Chrome's
+       force-dark (or iPad Smart Invert) re-tints or drops gradients, which
+       left the bar near-white with white text on it — invisible. With a plain
+       background-color underneath, the bar stays red whatever happens to the
+       gradient. */
+    background-color: var(--kha-red);
+    background-image: linear-gradient(135deg, var(--kha-red) 0%, var(--kha-red-dark) 100%);
+    color: #ffffff;
     position: sticky;
     top: 0;
     z-index: 1060;
@@ -120,8 +126,10 @@ a.vendor-user-link:hover {
     padding: 0.5rem 1rem;
 }
 
+/* Stated explicitly rather than inherited from .vendor-topbar: inherited
+   colours are the first thing a forced-dark renderer rewrites. */
 .vendor-topbar .vendor-logo {
-    color: white;
+    color: #ffffff;
     font-size: 1.4rem;
 }
 
@@ -148,12 +156,20 @@ a.vendor-user-link:hover {
 }
 
 .vendor-buyer-name {
-    font-size: 1.15rem;
-    font-weight: 600;
+    color: #ffffff;
+    font-size: 1.3rem;
+    font-weight: 700;
 }
 
+/* Filled rather than outline-only. btn-outline-light is a near-white glyph on
+   a transparent background, so it disappeared entirely whenever the bar behind
+   it lost its colour — and a kiosk needs its exit to be obvious at arm's
+   length in a bright room. */
 .vendor-exit-btn {
-    font-size: 1.5rem;
+    background-color: rgba(255, 255, 255, 0.22);
+    border-color: #ffffff;
+    color: #ffffff;
+    font-size: 1.75rem;
     line-height: 1;
     border-width: 2px;
     border-radius: 50%;
@@ -166,8 +182,12 @@ a.vendor-user-link:hover {
     -webkit-tap-highlight-color: transparent;
 }
 
-.vendor-exit-btn:hover {
-    background: rgba(255,255,255,0.15);
+.vendor-exit-btn:hover,
+.vendor-exit-btn:focus,
+.vendor-exit-btn:active {
+    background-color: rgba(255, 255, 255, 0.38);
+    border-color: #ffffff;
+    color: #ffffff;
     transform: scale(1.08);
 }
 
