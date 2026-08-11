@@ -27,6 +27,8 @@ urlpatterns = [
     path('dashboard', views.dashboard, name='dashboard'),
     path('scoreboard', views.scoreboard, name='scoreboard'),
     path('vendor/', views.vendor_splash, name='vendor_splash'),
+    # No link points here — the kiosk has no logout control by design. Type it.
+    path('vendor/logout/', views.vendor_logout, name='vendor_logout'),
     path('vendor/shop/<int:user_id>/', views.vendor_shop, name='vendor_shop'),
     path('vendor/checkout/', views.vendor_checkout, name='vendor_checkout'),
 ]

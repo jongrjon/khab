@@ -5,7 +5,7 @@ from django.utils import timezone
 from django.shortcuts import render
 from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth.models import User, Group
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from datetime import datetime, date, time, timedelta
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
@@ -696,6 +696,22 @@ def salescsv(request):
         return HttpResponseRedirect('/')   
 
 ####################VENDOR KIOSK VIEWS################################
+
+def vendor_logout(request):
+    """Sign the kiosk out. Reachable by typing the URL, on purpose.
+
+    The kiosk deliberately has no logout control: it is a shared till on a
+    touchscreen, and a stray tap must never sign it out mid-queue. So the only
+    way out is to know this address.
+
+    That means it has to answer GET, which Django 5 dropped from LogoutView
+    because a GET logout can be triggered by a forged request (an <img> tag on
+    another page, say). The trade-off is different here: this is an internal
+    kiosk, and the worst a forged request achieves is returning the till to its
+    login screen. Losing the accidental-tap protection would be worse.
+    """
+    logout(request)
+    return HttpResponseRedirect('/login/')
 
 def vendor_splash(request):
     if not request.user.groups.filter(name="vendor").exists():
